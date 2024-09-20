@@ -113,7 +113,7 @@ I have been starting bots-webserver on my Linux (CentOS) servers via an entry in
       fi
       ;;
      \*)
-      # For invalid arguments, print the usage message.
+      # For invalid arguments, print(the usage message.
       echo "Usage: $0 {start|stop|restart|reload|status}"
       exit 2
       ;;

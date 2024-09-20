@@ -31,7 +31,7 @@ Downloads at `the bots sourceforge site <http://sourceforge.net/projects/bots/fi
     * demonstrates the use of composite routes.
     * 2 different sources are used for incoming edifact files
     * convert edifact orders to fixed format.
-    * also converts these orders to print format (html).
+    * also converts these orders to print(format (html).
     * convert edifact SLSRPT to csv format.
     * all outgoing messages go to different destination using filtered outchannels
 * edifact2fixed_orders-desadv-invoic
@@ -71,7 +71,7 @@ Downloads at `the bots sourceforge site <http://sourceforge.net/projects/bots/fi
     * Translates edifact D96A invoice to JSON en vice versa.
 * edifact_ordertoprint
     * Translates a edifact ORDERS D96A message into a readable format (HTML).
-    * Of course you can print the order, so it is like a (edi)fax.
+    * Of course you can print(the order, so it is like a (edi)fax.
 * edifact_orders2csv_and_vv
     * Translates edifact D96A orders to csv en vice versa.
     * There a 2 variants: csv with or without record tags (csv from eg excel is often without records tags).

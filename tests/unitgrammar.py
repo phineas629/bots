@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 import unittest
 import sys
 import bots.botslib as botslib
@@ -10,9 +10,9 @@ import bots.grammar as grammar
 import bots.inmessage as inmessage
 import bots.outmessage as outmessage
 import bots.botsglobal as botsglobal
-import utilsunit
+from . import utilsunit
 if sys.version_info[0] > 2:
-    basestring = unicode = str
+    str = str = str
 
 ''' plugin unitgrammar.zip
     not an acceptance test.

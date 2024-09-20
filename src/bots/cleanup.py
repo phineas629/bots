@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+
 import sys
 if sys.version_info[0] > 2:
-    basestring = unicode = str
+    str = str = str
 import os
 import glob
 import time
 import datetime
 import stat
 import shutil
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 #bots-modules
 from . import botslib
 from . import botsglobal

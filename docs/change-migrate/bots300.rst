@@ -68,12 +68,12 @@ Migration Notes
 
     #. make a backup!
     #. rename existing installation
-        * existing bots-installation is in ``/usr/local/lib/python2.7/dist-packages``
+        * existing bots-installation is in ``/usr/local/lib/python3.7/dist-packages``
         * renamed bots directory to bots221
         * for libraries: check you use at least django 1.3
     #. do a fresh install: see :doc:`installation procedure <../installation>`
     #. copy old data to new installation.
-        * in ``/usr/local/lib/python2.7/dist-packages`` new bots-directory is installed.
+        * in ``/usr/local/lib/python3.7/dist-packages`` new bots-directory is installed.
         * copy directories botssys and usersys from bots221 directory to bots directories. Everything can be overwritten.
         * mind your rights!
     #. change settings

@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 import unittest
 import subprocess
 import logging
 import datetime
-import utilsunit
+from . import utilsunit
 import bots.botslib as botslib
 import bots.botsinit as botsinit
 import bots.botsglobal as botsglobal
 import bots.communication as communication
 from bots.botsconfig import *
 if sys.version_info[0] > 2:
-    basestring = unicode = str
+    str = str = str
 
 '''
 plugin unitfilenameout.zip
@@ -30,7 +30,7 @@ class TestMain(unittest.TestCase):
         comclass = communication._comsession(channeldict={
                                              'idchannel': 'dutchic_desadv_out'}, idroute='dutchic_desadv', userscript=None, scriptname=None, command='new', rootidta=0)
         count = 0
-        for row in botslib.query(u'''SELECT idta
+        for row in botslib.query('''SELECT idta
                                 FROM    ta
                                 WHERE   status=%(status)s
                                 AND     statust=%(statust)s
@@ -54,7 +54,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(comclass.filename_formatter('{infile}', ta), 'desadv1.edi', '')
             self.assertEqual(comclass.filename_formatter('{infile:name}.txt', ta), 'desadv1.txt', '')
             self.assertEqual(comclass.filename_formatter('{infile:name}.{infile:ext}', ta), 'desadv1.edi', '')
-            print('expect: <idta>.edi                          ', comclass.filename_formatter('{idta}.edi', ta))
+            print(('expect: <idta>.edi                          ', comclass.filename_formatter('{idta}.edi', ta)))
             self.assertRaises(botslib.CommunicationOutError, comclass.filename_formatter, '{tada}', ta)
             self.assertRaises(botslib.CommunicationOutError, comclass.filename_formatter, '{infile:test}', ta)
             if count == 1:  # test only 1 incoming files

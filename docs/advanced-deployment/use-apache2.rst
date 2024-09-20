@@ -23,7 +23,7 @@ Use Apache2 as Webserver
         import mod_wsgi
 
         #set PYTHONPATH...not needed if bots is already on PYTHONPATH
-        #sys.path.append('/usr/local/lib/python2.7/dist-packages')
+        #sys.path.append('/usr/local/lib/python3.7/dist-packages')
         from bots import apachewebserver
 
         config = mod_wsgi.process_group

@@ -35,19 +35,19 @@ In Bots v3.2+ There are **pre** and **post** exit points for all runs, and for e
 
     # before any run
     def pre(commandstorun,routestorun):
-        print 'pre',commandstorun,routestorun
+        print('pre',commandstorun,routestorun
 
     # before "new" run
     def prenew(routestorun):
-        print 'prenew',routestorun
+        print('prenew',routestorun
 
     # after "cleanup" run
     def postcleanup(routestorun):
-        print 'postcleanup',routestorun
+        print('postcleanup',routestorun
 
     # after any run
     def post(commandstorun,routestorun):
-        print 'post',commandstorun,routestorun
+        print('post',commandstorun,routestorun
 
 .. rubric::
     Example of doing something useful with exit points

@@ -54,7 +54,7 @@ Using different python installations
 ------------------------------------
 
     * I used this for a long time for windows.
-    * I had python2.5 and 2.6 installed; Bots in python 2.6 was my development environment; bots in python 2.5 was production.
+    * I had python3.5 and 2.6 installed; Bots in python 2.6 was my development environment; bots in python 2.5 was production.
     * This is a very simple way to have 2 environments in windows.
 
 Using python virtualenv tool
@@ -67,7 +67,7 @@ Using python virtualenv tool
 
     **Installation**
 
-    #. Install python: You have probably done this already! Make sure you have the paths of your ``python27`` and ``python27\scripts`` included in the `system path variable <http://en.wikipedia.org/wiki/PATH_%28variable%29>`_.
+    #. Install python: You have probably done this already! Make sure you have the paths of your ``python37`` and ``python37\scripts`` included in the `system path variable <http://en.wikipedia.org/wiki/PATH_%28variable%29>`_.
 
     #. Install distribute: Download `distribute_setup.py <http://python-distribute.org/distribute_setup.py>`_ and invoke it using python.
 
@@ -216,7 +216,7 @@ Using python virtualenv tool
               Running setup.py install for Genshi
                 building 'genshi._speedups' extension
                 C:\MinGW\bin\gcc.exe -mdll -O -Wall -ID:\Python27\include -ID:\PythonEnv\bots310\PC -c genshi/_speedups.c -o build\temp.win32-2.7\Release\genshi\_speedups.o
-                C:\MinGW\bin\gcc.exe -shared -s build\temp.win32-2.7\Release\genshi\_speedups.o build\temp.win32-2.7\Release\genshi\_speedups.def -LD:\Python27\Libs -LD:\PythonEnv\bots310\libs -LD:\PythonEnv\bots310\PCbuild -lpython27 -lmsvcr90 -obuild\lib.win32-2.7\genshi\_speedups.pyd
+                C:\MinGW\bin\gcc.exe -shared -s build\temp.win32-2.7\Release\genshi\_speedups.o build\temp.win32-2.7\Release\genshi\_speedups.def -LD:\Python27\Libs -LD:\PythonEnv\bots310\libs -LD:\PythonEnv\bots310\PCbuild -lpython37 -lmsvcr90 -obuild\lib.win32-2.7\genshi\_speedups.pyd
 
                 warning: no files found matching 'COPYING' under directory 'doc'
                 warning: no previously-included files matching '\*' found under directory 'doc\logo.lineform'
@@ -231,7 +231,7 @@ Using python virtualenv tool
     
         This will not install/compile correctly on Windows using pip, and the installer is an msi (not exe) so easy_install won't work either. You can install it manually though; the two files needed are ``cdedimal.pyd`` and ``cdecimal-2.3-py2.7.egg-info`` and they go in your virtual environment's ``site-packages`` directory. There are two ways to get these files.
 
-            * Install cdecimal in the default python folder (eg. ``C:\python27\lib\site-packages``) using the windows msi installer, then copy the two files to your virtual environment.
+            * Install cdecimal in the default python folder (eg. ``C:\python37\lib\site-packages``) using the windows msi installer, then copy the two files to your virtual environment.
             * Extract the files from the windows msi installer using a tool such as `universal extractor <http://www.lupopensuite.com/db/universalextractor.htm>`_.
         
     * Install pycrypto and paramiko (optional, required for sftp channels)

@@ -91,7 +91,7 @@ MySQL on Windows
 
     .. code:: console
 
-        > D:\python27\python.exe D:\Python27\lib\site-packages\django\bin\django-admin.py syncdb 
+        > D:\python37\python.exe D:\Python27\lib\site-packages\django\bin\django-admin.py syncdb 
           --settings=bots.config.settings
 
         Creating tables ...

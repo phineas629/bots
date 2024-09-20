@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 ''' Bots configuration for django's admin site.'''
-from __future__ import unicode_literals
+
 from django import forms
 try:
     from django.forms import util as django_forms_util
 except:
     from django.forms import utils as django_forms_util  # django1.7
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User

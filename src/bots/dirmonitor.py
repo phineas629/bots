@@ -8,8 +8,8 @@ runs as a daemon/service.
 this module contains separate implementations for linux and windows
 """
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 
 import click
 import fnmatch
@@ -147,7 +147,7 @@ def start(configdir):
     """
     botsinit.generalinit(configdir)  # find locating of bots, configfiles, init paths etc.
     if not botsglobal.ini.getboolean('jobqueue', 'enabled', False):
-        print('Error: bots jobqueue cannot start; not enabled in %s/bots.ini' % (configdir))
+        print(('Error: bots jobqueue cannot start; not enabled in %s/bots.ini' % (configdir)))
         sys.exit(1)
     process_name = 'dirmonitor'
     logger = botsinit.initserverlogging(process_name)

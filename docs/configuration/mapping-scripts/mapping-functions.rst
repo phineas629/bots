@@ -44,9 +44,9 @@ transform.datemask(value,frommask,tomask)
 
 .. code-block:: python
 
-    print transform.datemask('201512312359','YYYYmmDD0000','YYYYmmDD0000')
-    print transform.datemask('201512310000','YYYYmmDD0000','YYYYmmDD0000')
-    print transform.datemask('20151231','YYYYmmDD0000','YYYYmmDD0000')
+    print(transform.datemask('201512312359','YYYYmmDD0000','YYYYmmDD0000')
+    print(transform.datemask('201512310000','YYYYmmDD0000','YYYYmmDD0000')
+    print(transform.datemask('20151231','YYYYmmDD0000','YYYYmmDD0000')
     #returns date always in CCYYmmDDHHMM, if no tiem in original tiem is '0000'
 
 transform.concat(\*args)

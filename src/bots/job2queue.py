@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 
 import click
 import os
@@ -12,14 +12,14 @@ import sys
 try:  # python3
     import xmlrpc.client as xmlrpclib
 except ImportError:  # python2
-    import xmlrpclib
+    import xmlrpc.client
 
 # Bots-modules
 from . import botsinit
 from . import botsglobal
 
 if sys.version_info[0] > 2:
-    basestring = unicode = str
+    str = str = str
 
 
 JOBQUEUEMESSAGE2TXT = {
@@ -38,11 +38,11 @@ def send_job_to_jobqueue(task_args, priority=5):
     4 = job is a duplicate of job already in the queue
     """
     try:
-        remote_server = xmlrpclib.ServerProxy(
-            'http://localhost:' + unicode(botsglobal.ini.getint('jobqueue', 'port', 28082)))
+        remote_server = xmlrpc.client.ServerProxy(
+            'http://localhost:' + str(botsglobal.ini.getint('jobqueue', 'port', 28082)))
         return remote_server.addjob(task_args, priority)
     except socket.error as e:
-        print('socket.error', e)
+        print(('socket.error', e))
         return 1  # jobqueueserver server not active
 
 
@@ -109,11 +109,11 @@ def start(configdir, priority, task_args):
 
     botsinit.generalinit(configdir)
     if not botsglobal.ini.getboolean('jobqueue', 'enabled', False):
-        print('Error: bots jobqueue cannot start; not enabled in %s/bots.ini' % (configdir))
+        print(('Error: bots jobqueue cannot start; not enabled in %s/bots.ini' % (configdir)))
         sys.exit(1)
 
     return_code = send_job_to_jobqueue(task_args, priority)
-    print(JOBQUEUEMESSAGE2TXT[return_code])
+    print((JOBQUEUEMESSAGE2TXT[return_code]))
     sys.exit(return_code)
 
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 
 try:
     from cheroot.server import get_ssl_adapter_class
@@ -18,13 +18,13 @@ import click
 import sys
 
 from django.core.handlers.wsgi import WSGIHandler
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from . import botsglobal
 from . import botsinit
 
 if sys.version_info[0] > 2:
-    basestring = unicode = str
+    str = str = str
 
 
 @click.command()

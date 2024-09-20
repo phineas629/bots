@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 
 import atexit
 import click
@@ -11,9 +11,9 @@ import socket
 import sys
 
 if sys.version_info[0] > 2:
-    basestring = unicode = str
+    str = str = str
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from . import botslib
 from . import botsinit
@@ -118,7 +118,7 @@ def sqlite3():
         txt = botslib.txtexc()
         botsglobal.db.rollback()
         cursor.close()
-        print('Error in adding fields to sqlite3 database: "%s".' % (txt))
+        print(('Error in adding fields to sqlite3 database: "%s".' % (txt)))
         return 1
     else:
         botsglobal.db.commit()
@@ -131,7 +131,7 @@ def sqlite3():
         txt = botslib.txtexc()
         botsglobal.db.rollback()
         cursor.close()
-        print('Error in changing sqlite3 database-schema "routes": "%s".' % (txt))
+        print(('Error in changing sqlite3 database-schema "routes": "%s".' % (txt)))
         return 1
     else:
         botsglobal.db.commit()
@@ -208,7 +208,7 @@ def postgresql_psycopg2():
         txt = botslib.txtexc()
         botsglobal.db.rollback()
         cursor.close()
-        print('Error in changing postgresql database: "%s".' % (txt))
+        print(('Error in changing postgresql database: "%s".' % (txt)))
         return 1
     else:
         botsglobal.db.commit()
@@ -281,7 +281,7 @@ def mysql():
         txt = botslib.txtexc()
         botsglobal.db.rollback()
         cursor.close()
-        print('Error in changing mysql database: "%s".' % (txt))
+        print(('Error in changing mysql database: "%s".' % (txt)))
         return 1
     else:
         botsglobal.db.commit()

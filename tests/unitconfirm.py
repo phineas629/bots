@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 import unittest
 import shutil
 import os
 import sys
 import subprocess
 import logging
-import utilsunit
+from . import utilsunit
 import bots.botslib as botslib
 import bots.botsinit as botsinit
 import bots.botsglobal as botsglobal
 from bots.botsconfig import *
 if sys.version_info[0] > 2:
-    basestring = unicode = str
+    str = str = str
 
 
 '''
@@ -35,9 +35,9 @@ class TestMain(unittest.TestCase):
 
     def testroutetestmdn(self):
         lijst = utilsunit.getdir(os.path.join(botssys, 'outfile/confirm/mdn/*'))
-        self.failUnless(len(lijst) == 0)
+        self.assertTrue(len(lijst) == 0)
         nr_rows = 0
-        for row in botslib.query(u'''SELECT idta,confirmed,confirmidta
+        for row in botslib.query('''SELECT idta,confirmed,confirmidta
                                 FROM    ta
                                 WHERE   status=%(status)s
                                 AND     statust=%(statust)s
@@ -49,14 +49,14 @@ class TestMain(unittest.TestCase):
                                 ''',
                                  {'status': 220, 'statust': DONE, 'idroute': 'testmdn', 'confirmtype': 'send-email-MDN', 'confirmasked': True}):
             nr_rows += 1
-            print(row[str('idta')], row[str('confirmed')], row[str('confirmidta')])
-            self.failUnless(row[str('confirmed')])
-            self.failUnless(row[str('confirmidta')] != 0)
+            print((row[str('idta')], row[str('confirmed')], row[str('confirmidta')]))
+            self.assertTrue(row[str('confirmed')])
+            self.assertTrue(row[str('confirmidta')] != 0)
         else:
-            self.failUnless(nr_rows == 1)
+            self.assertTrue(nr_rows == 1)
 
         nr_rows = 0
-        for row in botslib.query(u'''SELECT idta,confirmed,confirmidta
+        for row in botslib.query('''SELECT idta,confirmed,confirmidta
                                 FROM    ta
                                 WHERE   status=%(status)s
                                 AND     statust=%(statust)s
@@ -68,16 +68,16 @@ class TestMain(unittest.TestCase):
                                 ''',
                                  {'status': 500, 'statust': DONE, 'idroute': 'testmdn', 'confirmtype': 'ask-email-MDN', 'confirmasked': True}):
             nr_rows += 1
-            self.failUnless(row[str('confirmed')])
-            self.failUnless(row[str('confirmidta')] != 0)
+            self.assertTrue(row[str('confirmed')])
+            self.assertTrue(row[str('confirmidta')] != 0)
         else:
-            self.failUnless(nr_rows == 1)
+            self.assertTrue(nr_rows == 1)
 
     def testroutetestmdn2(self):
         lijst = utilsunit.getdir(os.path.join(botssys, 'outfile/confirm/mdn2/*'))
-        self.failUnless(len(lijst) == 0)
+        self.assertTrue(len(lijst) == 0)
         nr_rows = 0
-        for row in botslib.query(u'''SELECT idta,confirmed,confirmidta
+        for row in botslib.query('''SELECT idta,confirmed,confirmidta
                                 FROM    ta
                                 WHERE   status=%(status)s
                                 AND     statust=%(statust)s
@@ -89,14 +89,14 @@ class TestMain(unittest.TestCase):
                                 ''',
                                  {'status': 500, 'statust': DONE, 'idroute': 'testmdn2', 'confirmtype': 'ask-email-MDN', 'confirmasked': True}):
             nr_rows += 1
-            self.failUnless(not row[str('confirmed')])
-            self.failUnless(row[str('confirmidta')] == 0)
+            self.assertTrue(not row[str('confirmed')])
+            self.assertTrue(row[str('confirmidta')] == 0)
         else:
-            self.failUnless(nr_rows == 1)
+            self.assertTrue(nr_rows == 1)
 
     def testrouteotherx12(self):
         lijst = utilsunit.getdir(os.path.join(botssys, 'outfile/confirm/otherx12/*'))
-        self.failUnless(len(lijst) == 15)
+        self.assertTrue(len(lijst) == 15)
 
     def testroutetest997(self):
         '''
@@ -110,11 +110,11 @@ class TestMain(unittest.TestCase):
                                                         send xml (to trash)
         '''
         lijst = utilsunit.getdir(os.path.join(botssys, 'outfile/confirm/x12/*'))
-        self.failUnless(len(lijst) == 0)
+        self.assertTrue(len(lijst) == 0)
         lijst = utilsunit.getdir(os.path.join(botssys, 'outfile/confirm/trash/*'))
-        self.failUnless(len(lijst) == 6)
+        self.assertTrue(len(lijst) == 6)
         counter = 0
-        for row in botslib.query(u'''SELECT idta,confirmed,confirmidta
+        for row in botslib.query('''SELECT idta,confirmed,confirmidta
                                 FROM    ta
                                 WHERE   status=%(status)s
                                 AND     statust=%(statust)s
@@ -126,16 +126,16 @@ class TestMain(unittest.TestCase):
                                  {'status': 400, 'statust': DONE, 'idroute': 'test997', 'confirmtype': 'ask-x12-997', 'confirmasked': True}):
             counter += 1
             if counter == 1:
-                self.failUnless(not row[str('confirmed')])
-                self.failUnless(row[str('confirmidta')] == 0)
+                self.assertTrue(not row[str('confirmed')])
+                self.assertTrue(row[str('confirmidta')] == 0)
             elif counter == 2:
-                self.failUnless(row[str('confirmed')])
-                self.failUnless(row[str('confirmidta')] != 0)
+                self.assertTrue(row[str('confirmed')])
+                self.assertTrue(row[str('confirmidta')] != 0)
             else:
                 break
         else:
-            self.failUnless(counter != 0)
-        for row in botslib.query(u'''SELECT idta,confirmed,confirmidta
+            self.assertTrue(counter != 0)
+        for row in botslib.query('''SELECT idta,confirmed,confirmidta
                                 FROM    ta
                                 WHERE   status=%(status)s
                                 AND     statust=%(statust)s
@@ -147,12 +147,12 @@ class TestMain(unittest.TestCase):
                                  {'status': 310, 'statust': DONE, 'idroute': 'test997', 'confirmtype': 'send-x12-997', 'confirmasked': True}):
             counter += 1
             if counter <= 2:
-                self.failUnless(row[str('confirmed')])
-                self.failUnless(row[str('confirmidta')] != 0)
+                self.assertTrue(row[str('confirmed')])
+                self.assertTrue(row[str('confirmidta')] != 0)
             else:
                 break
         else:
-            self.failUnless(counter != 0)
+            self.assertTrue(counter != 0)
 
     def testroutetestcontrl(self):
         '''
@@ -166,11 +166,11 @@ class TestMain(unittest.TestCase):
                                                              send xml (to trash)
         '''
         lijst = utilsunit.getdir(os.path.join(botssys, 'outfile/confirm/edifact/*'))
-        self.failUnless(len(lijst) == 0)
+        self.assertTrue(len(lijst) == 0)
         lijst = utilsunit.getdir(os.path.join(botssys, 'outfile/confirm/trash/*'))
-        self.failUnless(len(lijst) == 6)
+        self.assertTrue(len(lijst) == 6)
         counter = 0
-        for row in botslib.query(u'''SELECT idta,confirmed,confirmidta
+        for row in botslib.query('''SELECT idta,confirmed,confirmidta
                                 FROM    ta
                                 WHERE   status=%(status)s
                                 AND     statust=%(statust)s
@@ -182,16 +182,16 @@ class TestMain(unittest.TestCase):
                                  {'status': 400, 'statust': DONE, 'idroute': 'testcontrl', 'confirmtype': 'ask-edifact-CONTRL', 'confirmasked': True}):
             counter += 1
             if counter == 1:
-                self.failUnless(not row[str('confirmed')])
-                self.failUnless(row[str('confirmidta')] == 0)
+                self.assertTrue(not row[str('confirmed')])
+                self.assertTrue(row[str('confirmidta')] == 0)
             elif counter == 2:
-                self.failUnless(row[str('confirmed')])
-                self.failUnless(row[str('confirmidta')] != 0)
+                self.assertTrue(row[str('confirmed')])
+                self.assertTrue(row[str('confirmidta')] != 0)
             else:
                 break
         else:
-            self.failUnless(counter != 0)
-        for row in botslib.query(u'''SELECT idta,confirmed,confirmidta
+            self.assertTrue(counter != 0)
+        for row in botslib.query('''SELECT idta,confirmed,confirmidta
                                 FROM    ta
                                 WHERE   status=%(status)s
                                 AND     statust=%(statust)s
@@ -203,36 +203,36 @@ class TestMain(unittest.TestCase):
                                  {'status': 310, 'statust': DONE, 'idroute': 'testcontrl', 'confirmtype': 'send-edifact-CONTRL', 'confirmasked': True}):
             counter += 1
             if counter <= 2:
-                self.failUnless(row[str('confirmed')])
-                self.failUnless(row[str('confirmidta')] != 0)
+                self.assertTrue(row[str('confirmed')])
+                self.assertTrue(row[str('confirmidta')] != 0)
             else:
                 break
         else:
-            self.failUnless(counter != 0)
+            self.assertTrue(counter != 0)
 
     def testconfirmrulesdirect(self):
-        self.failUnless(True == botslib.checkconfirmrules('send-x12-997', idroute='idroute', idchannel='tochannel',
+        self.assertTrue(True == botslib.checkconfirmrules('send-x12-997', idroute='idroute', idchannel='tochannel',
                                                           topartner='topartner', frompartner='frompartner', editype='x12', messagetype='messagetype'))
-        self.failUnless(True == botslib.checkconfirmrules('send-x12-997', idroute='idroute', idchannel='tochannel',
+        self.assertTrue(True == botslib.checkconfirmrules('send-x12-997', idroute='idroute', idchannel='tochannel',
                                                           topartner='topartner', frompartner='frompartner', editype='x12', messagetype='justfortes'))
-        self.failUnless(True == botslib.checkconfirmrules('send-x12-997', idroute='idroute', idchannel='tochannel',
+        self.assertTrue(True == botslib.checkconfirmrules('send-x12-997', idroute='idroute', idchannel='tochannel',
                                                           topartner='topartner', frompartner='frompartner', editype='x12', messagetype='justfortest2'))
-        self.failUnless(False == botslib.checkconfirmrules('send-x12-997', idroute='idroute', idchannel='tochannel',
+        self.assertTrue(False == botslib.checkconfirmrules('send-x12-997', idroute='idroute', idchannel='tochannel',
                                                            topartner='topartner', frompartner='frompartner', editype='x12', messagetype='justfortest'))
 
-        self.failUnless(True == botslib.checkconfirmrules('send-email-MDN', idroute='idroute', idchannel='tochannel',
+        self.assertTrue(True == botslib.checkconfirmrules('send-email-MDN', idroute='idroute', idchannel='tochannel',
                                                           topartner='topartner', frompartner='frompartner', editype='x12', messagetype='messagetype'))
-        self.failUnless(False == botslib.checkconfirmrules('send-email-MDN', idroute='otherx12', idchannel='tochannel',
+        self.assertTrue(False == botslib.checkconfirmrules('send-email-MDN', idroute='otherx12', idchannel='tochannel',
                                                            topartner='topartner', frompartner='frompartner', editype='x12', messagetype='messagetype'))
-        self.failUnless(False == botslib.checkconfirmrules('send-email-MDN', idroute='idroute', idchannel='mdn2_in',
+        self.assertTrue(False == botslib.checkconfirmrules('send-email-MDN', idroute='idroute', idchannel='mdn2_in',
                                                            topartner='topartner', frompartner='frompartner', editype='x12', messagetype='messagetype'))
-        self.failUnless(False == botslib.checkconfirmrules('send-email-MDN', idroute='idroute', idchannel='tochannel',
+        self.assertTrue(False == botslib.checkconfirmrules('send-email-MDN', idroute='idroute', idchannel='tochannel',
                                                            topartner='partnerunittest', frompartner='frompartner', editype='x12', messagetype='messagetype'))
-        self.failUnless(False == botslib.checkconfirmrules('send-email-MDN', idroute='idroute', idchannel='tochannel',
+        self.assertTrue(False == botslib.checkconfirmrules('send-email-MDN', idroute='idroute', idchannel='tochannel',
                                                            topartner='topartner', frompartner='partnerunittest', editype='x12', messagetype='messagetype'))
-        self.failUnless(False == botslib.checkconfirmrules('send-email-MDN', idroute='otherx12', idchannel='mdn2_in',
+        self.assertTrue(False == botslib.checkconfirmrules('send-email-MDN', idroute='otherx12', idchannel='mdn2_in',
                                                            topartner='partnerunittest', frompartner='partnerunittest', editype='x12', messagetype='messagetype'))
-        self.failUnless(True == botslib.checkconfirmrules('send-email-MDN', idroute='otherx1', idchannel='mdn2_i',
+        self.assertTrue(True == botslib.checkconfirmrules('send-email-MDN', idroute='otherx1', idchannel='mdn2_i',
                                                           topartner='partnerunittes', frompartner='partnerunittes', editype='x12', messagetype='messagetype'))
 
 

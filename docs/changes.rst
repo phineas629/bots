@@ -6,7 +6,7 @@ Changelog
 ------------------
 
 - Restore jobqueueserver. It was broken in 3.3.0 because of unfinished
-  python2/3-support. Fixes https://github.com/bots-edi/bots/issues/21.
+  python3/3-support. Fixes https://github.com/bots-edi/bots/issues/21.
   [WouterVH]
 
 - Remove ``bots_importlib``. Python2.6 is no longer supported.

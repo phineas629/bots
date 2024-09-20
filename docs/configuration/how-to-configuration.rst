@@ -43,7 +43,7 @@ This is how I start with a new route and translation...
 * Configure a :doc:`translation <translation/index>` and create a :doc:`mapping script <mapping-scripts/index>`. 
     * Start with mapping just the bare minimum mapping one or two fields (eg. order number) and again iteratively modify and test until you have some output.
     * if your output grammar is edifact or X12 for example, you'll need to at least map the mandatory segments to create a valid document.
-* When testing a mapping, it's very useful to insert print statements to help with :doc:`debugging <../debugging>`. The output will be seen in the webserver console window if you run bots engine from the GUI menu.
+* When testing a mapping, it's very useful to insert print(statements to help with :doc:`debugging <../debugging>`. The output will be seen in the webserver console window if you run bots engine from the GUI menu.
 
 * Once you can run the route with no errors and get "something" output you'll feel that sense of achievement and can then go on to add everything else you need into the mapping and grammar, piece by piece. 
 * If you have many mappings to do, create a module of common functions you create, and import into every mapping. 

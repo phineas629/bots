@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-import pkg_resources
+
+try:
+    import importlib.metadata as importlib_metadata
+except ImportError:
+    import importlib_metadata
 
 #Globals used by Bots
-version = pkg_resources.get_distribution('bots').version  # bots version
+try:
+    version = importlib_metadata.version('bots')  # bots version
+except importlib_metadata.PackageNotFoundError:
+    version = "unknown"  # Set a default version if 'bots' package is not found
 db = None  # db-object
 ini = None  # ini-file-object that is read (bots.ini)
 logger = None  # logger or bots-engine

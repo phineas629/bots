@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 import copy
 import sys
 import os
@@ -14,7 +14,7 @@ import bots.botsglobal as botsglobal
 import bots.inmessage as inmessage
 import bots.outmessage as outmessage
 if sys.version_info[0] > 2:
-    basestring = unicode = str
+    str = str = str
 
 
 def comparenode(node1, node2org):
@@ -32,19 +32,19 @@ def comparenodecore(node1, node2):
     if node1.record is None and node2.record is None:
         pass
     else:
-        for key, value in node1.record.items():
+        for key, value in list(node1.record.items()):
             if key not in node2.record:
-                print('key not in node2', key, value)
+                print(('key not in node2', key, value))
                 return False
             elif node2.record[key] != value:
-                print('unequal attr', key, value, node2.record[key])
+                print(('unequal attr', key, value, node2.record[key]))
                 return False
-        for key, value in node2.record.items():
+        for key, value in list(node2.record.items()):
             if key not in node1.record:
-                print('key not in node1', key, value)
+                print(('key not in node1', key, value))
                 return False
             elif node1.record[key] != value:
-                print('unequal attr', key, value, node1.record[key])
+                print(('unequal attr', key, value, node1.record[key]))
                 return False
     if len(node1.children) != len(node2.children):
         print('number of children not equal')
@@ -57,7 +57,7 @@ def comparenodecore(node1, node2):
                 del node2.children[i:i + 1]
                 break
         else:
-            print('Found no matching record in node2 for', child1.record)
+            print(('Found no matching record in node2 for', child1.record))
             return False
     return True
 
@@ -102,7 +102,7 @@ def dummylogger():
 
 
 def getreportlastrun():
-    for row in botslib.query(u'''SELECT *
+    for row in botslib.query('''SELECT *
                             FROM    report
                             ORDER BY idta DESC
                             '''):
@@ -111,7 +111,7 @@ def getreportlastrun():
 
 
 def geterrorlastrun():
-    for row in botslib.query(u'''SELECT *
+    for row in botslib.query('''SELECT *
                             FROM    filereport
                             ORDER BY idta DESC
                             '''):
@@ -120,7 +120,7 @@ def geterrorlastrun():
 
 
 def getlastta(status):
-    for row in botslib.query(u'''SELECT *
+    for row in botslib.query('''SELECT *
                             FROM    ta
                             WHERE  status=%(status)s
                             ORDER BY idta DESC
@@ -130,7 +130,7 @@ def getlastta(status):
 
 
 def comparedicts(dict1, dict2):
-    for key, value in dict1.items():
+    for key, value in list(dict1.items()):
         if value != dict2[str(key)]:
             raise Exception('error comparing "%s": should be %s but is %s (in db),' % (key, value, dict2[key]))
 

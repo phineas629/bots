@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+
 import django
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 #***********
 from . import models
 from . import viewlib

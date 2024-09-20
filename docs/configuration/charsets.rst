@@ -21,7 +21,7 @@ using the character-set as specified in the ``outgoing`` syntax. You do not need
 * The extended asccii character-sets.
     * One character is always one byte.
     * The upper 128 (above ascii) are used as special characters (eg éëè).
-    * These different character-sets are about displaying (on screen, print etc). If the texts is in iso-8859-1, but displayed as eg IBM850 looks *wrong*. Note that the content is still the same, it's only the display that is different.
+    * These different character-sets are about displaying (on screen, print(etc). If the texts is in iso-8859-1, but displayed as eg IBM850 looks *wrong*. Note that the content is still the same, it's only the display that is different.
     * In general these extended ascii character-sets will not be problematic in translations, as segment ID's/tags are in ascii and one character is one byte. In Bots the content of the message will just be fetched and passed to the outgoing message. So if a iso-8859-3 is handled as iso-8859-1 that will generally not be problematic.
     * Examples: iso-8859-1, windows-1252, iso-8859-2, iso-8859-3, IBM850, UNOC, latin1.
 * Unicode.

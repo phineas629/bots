@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 import os
 import sys
 import unittest
@@ -12,14 +12,14 @@ try:
 except ImportError:
     import simplejson
 
-import utilsunit
+from . import utilsunit
 import bots.botslib as botslib
 import bots.botsinit as botsinit
 import bots.botsglobal as botsglobal
 import bots.inmessage as inmessage
 import bots.outmessage as outmessage
 if sys.version_info[0] > 2:
-    basestring = unicode = str
+    str = str = str
 
 '''
 pluging unitinisout.zip
@@ -46,7 +46,7 @@ class TestInmessage_xml(unittest.TestCase):
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='xml',
                           messagetype='testxmlflatten', filename='botssys/infile/unitinmessagexml/xml/110401.xml')
         #only root record in 110402.xml
-        self.failUnless(inmessage.parse_edi_file(editype='xmlnocheck', messagetype='xmlnocheck',
+        self.assertTrue(inmessage.parse_edi_file(editype='xmlnocheck', messagetype='xmlnocheck',
                                                  filename='botssys/infile/unitinmessagexml/xml/110402.xml'), 'only a root tag; should be OK')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='xml',
                           messagetype='testxml', filename='botssys/infile/unitinmessagexml/xml/110402.xml')
@@ -72,7 +72,7 @@ class TestInmessage_xml(unittest.TestCase):
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='xmlnocheck',
                           messagetype='xmlnocheck', filename='botssys/infile/unitinmessagexml/xml/110409.xml')
         #invalid: mandatory xml-element missing
-        self.failUnless(inmessage.parse_edi_file(editype='xmlnocheck', messagetype='xmlnocheck',
+        self.assertTrue(inmessage.parse_edi_file(editype='xmlnocheck', messagetype='xmlnocheck',
                                                  filename='botssys/infile/unitinmessagexml/xml/110410.xml'), '')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='xml',
                           messagetype='testxml', filename='botssys/infile/unitinmessagexml/xml/110410.xml')
@@ -115,14 +115,14 @@ class TestInmessage_xml(unittest.TestCase):
                                        filename='botssys/infile/unitinmessagexml/xml/110417.xml')
         in2 = inmessage.parse_edi_file(editype='xml', messagetype='testxml',
                                        filename='botssys/infile/unitinmessagexml/xml/110418.xml')
-        self.failUnless(utilsunit.comparenode(in2.root, in1.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in2.root, in1.root), 'compare')
 
         #??what is tested here
         inn7 = inmessage.parse_edi_file(editype='xml', messagetype='testxml', checkunknownentities=True,
                                         filename='botssys/infile/unitinmessagexml/xml/110405.xml')  # with <?xml version="1.0" encoding="utf-8"?>
         inn8 = inmessage.parse_edi_file(editype='xml', messagetype='testxmlflatten', checkunknownentities=True,
                                         filename='botssys/infile/unitinmessagexml/xml/110405.xml')  # with <?xml version="1.0" encoding="utf-8"?>
-        self.failUnless(utilsunit.comparenode(inn7.root, inn8.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(inn7.root, inn8.root), 'compare')
 
         #~ #test different file which should give equal results
         in1 = inmessage.parse_edi_file(editype='xmlnocheck', messagetype='xmlnocheck',
@@ -140,11 +140,11 @@ class TestInmessage_xml(unittest.TestCase):
         # use cr/lf and whitespace for 'nice' xml
         in4 = inmessage.parse_edi_file(editype='xml', messagetype='testxml',
                                        filename='botssys/infile/unitinmessagexml/xml/110405.xml')
-        self.failUnless(utilsunit.comparenode(in2.root, in1.root), 'compare')
-        self.failUnless(utilsunit.comparenode(in2.root, in3.root), 'compare')
-        self.failUnless(utilsunit.comparenode(in2.root, in4.root), 'compare')
-        self.failUnless(utilsunit.comparenode(in2.root, in5.root), 'compare')
-        self.failUnless(utilsunit.comparenode(in2.root, in6.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in2.root, in1.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in2.root, in3.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in2.root, in4.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in2.root, in5.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in2.root, in6.root), 'compare')
 
         #~ #test different file which should give equal results; flattenxml=True,
         in1 = inmessage.parse_edi_file(editype='xmlnocheck', messagetype='xmlnocheck',
@@ -162,11 +162,11 @@ class TestInmessage_xml(unittest.TestCase):
         # without <?xml version="1.0" encoding="utf-8"?>
         in3 = inmessage.parse_edi_file(editype='xml', messagetype='testxmlflatten',
                                        filename='botssys/infile/unitinmessagexml/xml/110404.xml')
-        self.failUnless(utilsunit.comparenode(in2.root, in1.root), 'compare')
-        self.failUnless(utilsunit.comparenode(in2.root, in3.root), 'compare')
-        self.failUnless(utilsunit.comparenode(in2.root, in4.root), 'compare')
-        self.failUnless(utilsunit.comparenode(in2.root, in5.root), 'compare')
-        self.failUnless(utilsunit.comparenode(in2.root, in6.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in2.root, in1.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in2.root, in3.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in2.root, in4.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in2.root, in5.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in2.root, in6.root), 'compare')
 
 
 class Testinisoutxml(unittest.TestCase):
@@ -176,7 +176,7 @@ class Testinisoutxml(unittest.TestCase):
         filenamein = 'botssys/infile/unitinmessagexml/xml/inisout02.xml'
         filenameout = 'botssys/infile/unitinmessagexml/output/inisout01a.xml'
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenamein, filenameout=filenameout)
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
 
     def testxml02a(self):
         ''' check xmlnoccheck; new behaviour'''
@@ -186,7 +186,7 @@ class Testinisoutxml(unittest.TestCase):
         utilsunit.readwrite(editype='xmlnocheck', messagetype='xmlnocheck',
                             filenamein=filenamein, filenameout=filenametmp)
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenametmp, filenameout=filenameout)
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
 
     def testxml03(self):
         ''' check  xml (different grammar)'''
@@ -194,7 +194,7 @@ class Testinisoutxml(unittest.TestCase):
         filenameout = 'botssys/infile/unitinmessagexml/output/inisout03.xml'
         utilsunit.readwrite(editype='xml', messagetype='testxmlflatten', charset='utf-8',
                             filenamein=filenamein, filenameout=filenameout)
-        self.failUnless(filecmp.cmp('bots/' + filenamein, 'bots/' + filenameout))
+        self.assertTrue(filecmp.cmp('bots/' + filenamein, 'bots/' + filenameout))
 
     def testxml04(self):
         ''' check xmlnoccheck'''
@@ -205,7 +205,7 @@ class Testinisoutxml(unittest.TestCase):
                             charset='utf-8', filenamein=filenamein, filenameout=filenametmp)
         utilsunit.readwrite(editype='xml', messagetype='testxmlflatten', charset='utf-8',
                             filenamein=filenametmp, filenameout=filenameout)
-        self.failUnless(filecmp.cmp('bots/' + filenamein, 'bots/' + filenameout))
+        self.assertTrue(filecmp.cmp('bots/' + filenamein, 'bots/' + filenameout))
 
     def testxml05(self):
         ''' test xml;  iso-8859-1'''
@@ -214,7 +214,7 @@ class Testinisoutxml(unittest.TestCase):
         filenameout = 'botssys/infile/unitinmessagexml/output/inisout05.xml'
         utilsunit.readwrite(editype='xml', messagetype='testxml', filenamein=filenamein,
                             filenameout=filenameout, charset='ISO-8859-1')
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
 
     def testxml06(self):
         ''' test xmlnocheck; iso-8859-1'''
@@ -226,7 +226,7 @@ class Testinisoutxml(unittest.TestCase):
                             filenamein=filenamein, filenameout=filenametmp, charset='ISO-8859-1')
         utilsunit.readwrite(editype='xml', messagetype='testxml', filenamein=filenametmp,
                             filenameout=filenameout, charset='ISO-8859-1')
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
 
     def testxml09(self):
         ''' BOM;; BOM is not written....'''
@@ -235,7 +235,7 @@ class Testinisoutxml(unittest.TestCase):
         filenameout = 'botssys/infile/unitinmessagexml/output/inisout09.xml'
         utilsunit.readwrite(editype='xml', messagetype='testxml', filenamein=filenamein,
                             filenameout=filenameout, charset='utf-8')
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
 
     def testxml10(self):
         ''' BOM;; BOM is not written....'''
@@ -247,7 +247,7 @@ class Testinisoutxml(unittest.TestCase):
                             filenamein=filenamein, filenameout=filenametmp)
         utilsunit.readwrite(editype='xml', messagetype='testxml', filenamein=filenametmp,
                             filenameout=filenameout, charset='utf-8')
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
 
     def testxml11(self):
         ''' check  xml; new behaviour; use standalone parameter'''
@@ -256,7 +256,7 @@ class Testinisoutxml(unittest.TestCase):
         filenamecmp = 'botssys/infile/unitinmessagexml/xml/inisout02.xml'
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenamein,
                             filenameout=filenameout, standalone=None)
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
 
     def testxml11a(self):
         ''' check  xml; new behaviour; use standalone parameter'''
@@ -264,7 +264,7 @@ class Testinisoutxml(unittest.TestCase):
         filenameout = 'botssys/infile/unitinmessagexml/output/inisout11a.xml'
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenamein,
                             filenameout=filenameout, standalone='no')
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
 
     def testxml12(self):
         ''' check xmlnoccheck; new behaviour use standalone parameter'''
@@ -275,7 +275,7 @@ class Testinisoutxml(unittest.TestCase):
                             filenamein=filenamein, filenameout=filenametmp, standalone='no')
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenametmp,
                             filenameout=filenameout, standalone='no')
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
 
     def testxml13(self):
         ''' check  xml; read doctype&write doctype'''
@@ -283,7 +283,7 @@ class Testinisoutxml(unittest.TestCase):
         filenameout = 'botssys/infile/unitinmessagexml/output/inisout13.xml'
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenamein,
                             filenameout=filenameout, DOCTYPE='mydoctype SYSTEM "mydoctype.dtd"')
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
 
     def testxml14(self):
         ''' check xmlnoccheck;  read doctype&write doctype'''
@@ -294,7 +294,7 @@ class Testinisoutxml(unittest.TestCase):
                             filenameout=filenametmp, DOCTYPE='mydoctype SYSTEM "mydoctype.dtd"')
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenametmp,
                             filenameout=filenameout, DOCTYPE='mydoctype SYSTEM "mydoctype.dtd"')
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
 
     def testxml15(self):
         ''' check  xml; read processing_instructions&write processing_instructions'''
@@ -302,7 +302,7 @@ class Testinisoutxml(unittest.TestCase):
         filenameout = 'botssys/infile/unitinmessagexml/output/inisout15.xml'
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenamein, filenameout=filenameout, processing_instructions=[
                             ('xml-stylesheet', 'href="mystylesheet.xsl" type="text/xml"'), ('type-of-ppi', 'attr1="value1" attr2="value2"')])
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
 
     def testxml16(self):
         ''' check xmlnoccheck;  read processing_instructions&write processing_instructions'''
@@ -313,7 +313,7 @@ class Testinisoutxml(unittest.TestCase):
                             ('xml-stylesheet', 'href="mystylesheet.xsl" type="text/xml"'), ('type-of-ppi', 'attr1="value1" attr2="value2"')])
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenametmp, filenameout=filenameout, processing_instructions=[
                             ('xml-stylesheet', 'href="mystylesheet.xsl" type="text/xml"'), ('type-of-ppi', 'attr1="value1" attr2="value2"')])
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
 
     def testxml17(self):
         ''' check  xml; read processing_instructions&doctype&comments. Do not write these.'''
@@ -321,7 +321,7 @@ class Testinisoutxml(unittest.TestCase):
         filenameout = 'botssys/infile/unitinmessagexml/output/inisout17.xml'
         filenamecmp = 'botssys/infile/unitinmessagexml/xml/inisout02.xml'
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenamein, filenameout=filenameout)
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
 
     def testxml18(self):
         ''' check  xml; read processing_instructions&doctype&comments. Do not write these.'''
@@ -332,7 +332,7 @@ class Testinisoutxml(unittest.TestCase):
         utilsunit.readwrite(editype='xmlnocheck', messagetype='xmlnocheck',
                             filenamein=filenamein, filenameout=filenametmp)
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenametmp, filenameout=filenameout)
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
 
     def testxml19(self):
         ''' check  xml; indented; use lot of options.'''
@@ -341,7 +341,7 @@ class Testinisoutxml(unittest.TestCase):
         filenamecmp = 'botssys/infile/unitinmessagexml/xml/inisout19.xml'
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenamein, filenameout=filenameout, indented=True, standalone='yes', DOCTYPE='mydoctype SYSTEM "mydoctype.dtd"',
                             processing_instructions=[('xml-stylesheet', 'href="mystylesheet.xsl" type="text/xml"'), ('type-of-ppi', 'attr1="value1" attr2="value2"')])
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
 
     def testxml20(self):
         ''' check  xml; indented; use lot of options.'''
@@ -353,7 +353,7 @@ class Testinisoutxml(unittest.TestCase):
                             DOCTYPE='mydoctype SYSTEM "mydoctype.dtd"', processing_instructions=[('xml-stylesheet', 'href="mystylesheet.xsl" type="text/xml"'), ('type-of-ppi', 'attr1="value1" attr2="value2"')])
         utilsunit.readwrite(editype='xml', messagetype='xmlorder', filenamein=filenametmp, filenameout=filenameout, indented=True, standalone='yes', DOCTYPE='mydoctype SYSTEM "mydoctype.dtd"',
                             processing_instructions=[('xml-stylesheet', 'href="mystylesheet.xsl" type="text/xml"'), ('type-of-ppi', 'attr1="value1" attr2="value2"')])
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamecmp))
 
 
 class InmessageJson(unittest.TestCase):
@@ -366,28 +366,28 @@ class InmessageJson(unittest.TestCase):
         filecomp = 'botssys/infile/unitinmessagejson/comp/01.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='json', messagetype='articles')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xml', messagetype='articles')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testjson01nocheck(self):
         filein = 'botssys/infile/unitinmessagejson/org/01.jsn'
         filecomp = 'botssys/infile/unitinmessagejson/comp/01.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='jsonnocheck', messagetype='articles')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xml', messagetype='articles')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testjson11(self):
         filein = 'botssys/infile/unitinmessagejson/org/11.jsn'
         filecomp = 'botssys/infile/unitinmessagejson/comp/01.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='json', messagetype='articles')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xml', messagetype='articles')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testjson11nocheck(self):
         filein = 'botssys/infile/unitinmessagejson/org/11.jsn'
         filecomp = 'botssys/infile/unitinmessagejson/comp/01.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='jsonnocheck', messagetype='articles')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xml', messagetype='articles')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
     #***********************************************************************
     #*********json incoming tests complex structure*************************
     #***********************************************************************
@@ -397,14 +397,14 @@ class InmessageJson(unittest.TestCase):
         filecomp = 'botssys/infile/unitinmessagejson/comp/invoic01.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='json', messagetype='invoic')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xml', messagetype='invoic')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testjsoninvoic01nocheck(self):
         filein = 'botssys/infile/unitinmessagejson/org/invoic01.jsn'
         filecomp = 'botssys/infile/unitinmessagejson/comp/invoic01.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='jsonnocheck', messagetype='invoic')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xml', messagetype='invoic')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testjsoninvoic02(self):
         ''' check  01.xml the same after rad&write/check '''
@@ -412,7 +412,7 @@ class InmessageJson(unittest.TestCase):
         filecomp = 'botssys/infile/unitinmessagejson/comp/invoic01.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='json', messagetype='invoic')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xml', messagetype='invoic')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testjsoninvoic02nocheck(self):
         ''' check  01.xml the same after rad&write/check '''
@@ -420,7 +420,7 @@ class InmessageJson(unittest.TestCase):
         filecomp = 'botssys/infile/unitinmessagejson/comp/invoic01.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='jsonnocheck', messagetype='invoic')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xml', messagetype='invoic')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     #***********************************************************************
     #*********json incoming tests int,float*********************************
@@ -431,7 +431,7 @@ class InmessageJson(unittest.TestCase):
         filecomp = 'botssys/infile/unitinmessagejson/comp/invoic02.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='json', messagetype='invoic')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xml', messagetype='invoic')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testjsoninvoic03xmlnocheck(self):
         ''' test int, float in json '''
@@ -439,7 +439,7 @@ class InmessageJson(unittest.TestCase):
         filecomp = 'botssys/infile/unitinmessagejson/comp/invoic02.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='json', messagetype='invoic')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xmlnocheck', messagetype='invoic')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testjsoninvoic03nocheck(self):
         ''' test int, float in json '''
@@ -447,7 +447,7 @@ class InmessageJson(unittest.TestCase):
         filecomp = 'botssys/infile/unitinmessagejson/comp/invoic02.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='jsonnocheck', messagetype='invoic')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xml', messagetype='invoic')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testjsoninvoic03nocheckxmlnocheck(self):
         ''' test int, float in json '''
@@ -455,12 +455,12 @@ class InmessageJson(unittest.TestCase):
         filecomp = 'botssys/infile/unitinmessagejson/comp/invoic02.xml'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='jsonnocheck', messagetype='invoic')
         inn2 = inmessage.parse_edi_file(filename=filecomp, editype='xmlnocheck', messagetype='invoic')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testjsondiv(self):
-        self.failUnless(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
+        self.assertTrue(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
                                                  checkunknownentities=True, filename='botssys/infile/unitinmessagejson/org/130101.json'), 'standaard test')
-        self.failUnless(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
+        self.assertTrue(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
                                                  filename='botssys/infile/unitinmessagejson/org/130101.json'), 'standaard test')
 
         #~ #empty object
@@ -468,9 +468,9 @@ class InmessageJson(unittest.TestCase):
                           checkunknownentities=True, filename='botssys/infile/unitinmessagejson/org/130102.json')
 
         #unknown field
-        self.failUnless(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
+        self.assertTrue(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
                                                  checkunknownentities=False, filename='botssys/infile/unitinmessagejson/org/130103.json'), 'unknown field')
-        self.failUnless(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
+        self.assertTrue(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
                                                  filename='botssys/infile/unitinmessagejson/org/130103.json'), 'unknown field')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='json', messagetype='testjsonorder01',
                           checkunknownentities=True, filename='botssys/infile/unitinmessagejson/org/130103.json')  # unknown field
@@ -480,33 +480,33 @@ class InmessageJson(unittest.TestCase):
                                        checkunknownentities=True, filename='botssys/infile/unitinmessagejson/org/130101.json')
         in2 = inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
                                        checkunknownentities=False, filename='botssys/infile/unitinmessagejson/org/130115.json')
-        self.failUnless(utilsunit.comparenode(in1.root, in2.root), 'compare')
+        self.assertTrue(utilsunit.comparenode(in1.root, in2.root), 'compare')
 
         #numeriek field
-        self.failUnless(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
+        self.assertTrue(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
                                                  checkunknownentities=False, filename='botssys/infile/unitinmessagejson/org/130104.json'), 'numeriek field')
-        self.failUnless(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
+        self.assertTrue(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
                                                  checkunknownentities=False, filename='botssys/infile/unitinmessagejson/org/130104.json'), 'numeriek field')
-        self.failUnless(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
+        self.assertTrue(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
                                                  checkunknownentities=True, filename='botssys/infile/unitinmessagejson/org/130104.json'), 'numeriek field')
 
-        self.failUnless(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
+        self.assertTrue(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
                                                  checkunknownentities=False, filename='botssys/infile/unitinmessagejson/org/130105.json'), 'fucked up')
-        self.failUnless(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
+        self.assertTrue(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
                                                  filename='botssys/infile/unitinmessagejson/org/130105.json'), 'fucked up')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='json', messagetype='testjsonorder01',
                           checkunknownentities=True, filename='botssys/infile/unitinmessagejson/org/130105.json')  # fucked up
 
-        self.failUnless(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
+        self.assertTrue(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
                                                  checkunknownentities=False, filename='botssys/infile/unitinmessagejson/org/130106.json'), 'fucked up')
-        self.failUnless(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
+        self.assertTrue(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
                                                  filename='botssys/infile/unitinmessagejson/org/130106.json'), 'fucked up')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='json', messagetype='testjsonorder01',
                           checkunknownentities=True, filename='botssys/infile/unitinmessagejson/org/130106.json')  # fucked up
 
-        self.failUnless(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
+        self.assertTrue(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01',
                                                  checkunknownentities=False, filename='botssys/infile/unitinmessagejson/org/130107.json'), 'fucked up')
-        self.failUnless(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
+        self.assertTrue(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
                                                  filename='botssys/infile/unitinmessagejson/org/130107.json'), 'fucked up')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='json', messagetype='testjsonorder01',
                           checkunknownentities=True, filename='botssys/infile/unitinmessagejson/org/130107.json')  # fucked up
@@ -520,9 +520,9 @@ class InmessageJson(unittest.TestCase):
         self.assertEqual(len(inn.root.children), 3, 'should deliver 3 messagetrees')
 
         #root is list, but list has a non-object member
-        self.failUnless(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01', checkunknownentities=False,
+        self.assertTrue(inmessage.parse_edi_file(editype='json', messagetype='testjsonorder01', checkunknownentities=False,
                                                  filename='botssys/infile/unitinmessagejson/org/130109.json'), 'root is list, but list has a non-object member')
-        self.failUnless(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
+        self.assertTrue(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
                                                  filename='botssys/infile/unitinmessagejson/org/130109.json'), 'root is list, but list has a non-object member')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='json', messagetype='testjsonorder01', checkunknownentities=True,
                           filename='botssys/infile/unitinmessagejson/org/130109.json')  # root is list, but list has a non-object member
@@ -532,14 +532,14 @@ class InmessageJson(unittest.TestCase):
 
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='json', messagetype='testjsonorder01',
                           checkunknownentities=False, filename='botssys/infile/unitinmessagejson/org/130111.json')  # ent TEST1 should have a TEST2
-        self.failUnless(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
+        self.assertTrue(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
                                                  filename='botssys/infile/unitinmessagejson/org/130111.json'), 'ent TEST1 should have a TEST2')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='json', messagetype='testjsonorder01',
                           checkunknownentities=True, filename='botssys/infile/unitinmessagejson/org/130111.json')  # ent TEST1 should have a TEST2
 
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='json', messagetype='testjsonorder01',
                           checkunknownentities=False, filename='botssys/infile/unitinmessagejson/org/130112.json')  # ent TEST1 has a TEST2
-        self.failUnless(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
+        self.assertTrue(inmessage.parse_edi_file(editype='jsonnocheck', messagetype='jsonnocheck',
                                                  filename='botssys/infile/unitinmessagejson/org/130112.json'), 'ent TEST1 has a TEST2')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='json', messagetype='testjsonorder01',
                           checkunknownentities=True, filename='botssys/infile/unitinmessagejson/org/130112.json')  # ent TEST1 has a TEST2
@@ -570,7 +570,7 @@ class InmessageJson(unittest.TestCase):
         utilsunit.readwrite(editype='jsonnocheck', messagetype='jsonnocheck', filenamein=filein, filenameout=fileout3)
         inn1 = inmessage.parse_edi_file(filename=fileout1, editype='jsonnocheck', messagetype='jsonnocheck')
         inn2 = inmessage.parse_edi_file(filename=fileout3, editype='jsonnocheck', messagetype='jsonnocheck')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testinisoutjson02(self):
         #fails. this is because list of messages is read; and these are written in one time....nice for next release...
@@ -601,14 +601,14 @@ class InmessageJson(unittest.TestCase):
         utilsunit.readwrite(editype='json', messagetype='jsonorder', filenamein=filein, filenameout=fileout)
         inn1 = inmessage.parse_edi_file(filename=filein, editype='jsonnocheck', messagetype='jsonnocheck')
         inn2 = inmessage.parse_edi_file(filename=fileout, editype='jsonnocheck', messagetype='jsonnocheck')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
     def testinisoutjson04(self):
         filein = 'botssys/infile/unitinmessagejson/org/inisout05.json'
         inn1 = inmessage.parse_edi_file(filename=filein, editype='jsonnocheck',
                                         messagetype='jsonnocheck', defaultBOTSIDroot='HEA')
         inn2 = inmessage.parse_edi_file(filename=filein, editype='json', messagetype='jsoninvoic')
-        self.failUnless(utilsunit.comparenode(inn1.root, inn2.root))
+        self.assertTrue(utilsunit.comparenode(inn1.root, inn2.root))
 
 
 class TestInmessage(unittest.TestCase):
@@ -643,8 +643,8 @@ class TestInmessage(unittest.TestCase):
         in3 = inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
                                        filename='botssys/infile/unitinmessageedifact/0403/T0000000006.edi')  # UNOA regular
         for in1node, in2node, in3node in zip(in1.nextmessage(), in2.nextmessage(), in3.nextmessage()):
-            self.failUnless(utilsunit.comparenode(in1node.root, in2node.root), 'compare')
-            self.failUnless(utilsunit.comparenode(in1node.root, in3node.root), 'compare')
+            self.assertTrue(utilsunit.comparenode(in1node.root, in2node.root), 'compare')
+            self.assertTrue(utilsunit.comparenode(in1node.root, in3node.root), 'compare')
 
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='edifact', messagetype='edifact',
                           filename='botssys/infile/unitinmessageedifact/0403/040305.edi')  # needs UNOA regular
@@ -666,7 +666,7 @@ class TestInmessage(unittest.TestCase):
                           messagetype='edifact', filename='botssys/infile/unitinmessageedifact/0404/040401.edi')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='edifact',
                           messagetype='edifact', filename='botssys/infile/unitinmessageedifact/0404/040402.edi')
-        self.failUnless(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
+        self.assertTrue(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
                                                  filename='botssys/infile/unitinmessageedifact/0404/040403.edi'), 'standaard test')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='edifact',
                           messagetype='edifact', filename='botssys/infile/unitinmessageedifact/0404/040404.edi')
@@ -680,7 +680,7 @@ class TestInmessage(unittest.TestCase):
                           messagetype='edifact', filename='botssys/infile/unitinmessageedifact/0404/040408.edi')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='edifact',
                           messagetype='edifact', filename='botssys/infile/unitinmessageedifact/0404/040409.edi')
-        self.failUnless(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
+        self.assertTrue(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
                                                  filename='botssys/infile/unitinmessageedifact/0404/040410.edi'), 'standaard test')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='edifact',
                           messagetype='edifact', filename='botssys/infile/unitinmessageedifact/0404/040411.edi')
@@ -703,19 +703,19 @@ class TestInmessage(unittest.TestCase):
         #lex test with characters in strange places
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='edifact',
                           messagetype='edifact', filename='botssys/infile/unitinmessageedifact/0407/040701.edi')
-        self.failUnless(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
+        self.assertTrue(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
                                                  filename='botssys/infile/unitinmessageedifact/0407/040702.edi'), 'standaard test')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='edifact',
                           messagetype='edifact', filename='botssys/infile/unitinmessageedifact/0407/040703.edi')
         self.assertRaises(botslib.MessageError, inmessage.parse_edi_file, editype='edifact',
                           messagetype='edifact', filename='botssys/infile/unitinmessageedifact/0407/040704.edi')
-        self.failUnless(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
+        self.assertTrue(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
                                                  filename='botssys/infile/unitinmessageedifact/0407/040705.edi'), 'standaard test')
-        self.failUnless(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
+        self.assertTrue(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
                                                  filename='botssys/infile/unitinmessageedifact/0407/040706.edi'), 'UNOA Crtl-Z at end')
-        self.failUnless(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
+        self.assertTrue(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
                                                  filename='botssys/infile/unitinmessageedifact/0407/040707.edi'), 'UNOB Crtl-Z at end')
-        self.failUnless(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
+        self.assertTrue(inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
                                                  filename='botssys/infile/unitinmessageedifact/0407/040708.edi'), 'UNOC Crtl-Z at end')
 
     def testedifact0408(self):
@@ -727,8 +727,8 @@ class TestInmessage(unittest.TestCase):
         in3 = inmessage.parse_edi_file(editype='edifact', messagetype='edifact',
                                        filename='botssys/infile/unitinmessageedifact/0408/040803.edi')
         for in1node, in2node, in3node in zip(in1.nextmessage(), in2.nextmessage(), in3.nextmessage()):
-            self.failUnless(utilsunit.comparenode(in1node.root, in2node.root), 'compare')
-            self.failUnless(utilsunit.comparenode(in1node.root, in3node.root), 'compare')
+            self.assertTrue(utilsunit.comparenode(in1node.root, in2node.root), 'compare')
+            self.assertTrue(utilsunit.comparenode(in1node.root, in3node.root), 'compare')
 
 
 class Testinisoutedifact(unittest.TestCase):
@@ -741,7 +741,7 @@ class Testinisoutedifact(unittest.TestCase):
                                          filename=outfile, divtext='', topartner='')  # make outmessage object
         out.root = inn.root
         out.writeall()
-        self.failUnless(filecmp.cmp('bots/' + outfile, 'bots/' + infile))
+        self.assertTrue(filecmp.cmp('bots/' + outfile, 'bots/' + infile))
 
     def testedifact03(self):
         #~ #takes quite long
@@ -752,7 +752,7 @@ class Testinisoutedifact(unittest.TestCase):
                                          filename=outfile, divtext='', topartner='')  # make outmessage object
         out.root = inn.root
         out.writeall()
-        self.failUnless(filecmp.cmp('bots/' + outfile, 'bots/' + infile))
+        self.assertTrue(filecmp.cmp('bots/' + outfile, 'bots/' + infile))
 
     def testedifact04(self):
         utilsunit.readwrite(editype='edifact',
@@ -787,19 +787,19 @@ class Testinisoutedifact(unittest.TestCase):
                             messagetype='orderswithenvelope',
                             filenamein='botssys/infile/unitinisout/0406edifact/040608.edi',
                             filenameout='botssys/infile/unitinisout/output/040608.edi')
-        self.failUnless(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
+        self.assertTrue(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
                                     'bots/botssys/infile/unitinisout/output/040602.edi'))
-        self.failUnless(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
+        self.assertTrue(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
                                     'bots/botssys/infile/unitinisout/output/040603.edi'))
-        self.failUnless(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
+        self.assertTrue(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
                                     'bots/botssys/infile/unitinisout/output/040604.edi'))
-        self.failUnless(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
+        self.assertTrue(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
                                     'bots/botssys/infile/unitinisout/output/040605.edi'))
-        self.failUnless(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
+        self.assertTrue(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
                                     'bots/botssys/infile/unitinisout/output/040606.edi'))
-        self.failUnless(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
+        self.assertTrue(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
                                     'bots/botssys/infile/unitinisout/output/040607.edi'))
-        self.failUnless(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
+        self.assertTrue(filecmp.cmp('bots/botssys/infile/unitinisout/output/040601.edi',
                                     'bots/botssys/infile/unitinisout/output/040608.edi'))
 
 
@@ -813,7 +813,7 @@ class Testinisoutinh(unittest.TestCase):
                                          filename=filenameout, divtext='', topartner='KCS0004')  # make outmessage object
         out.root = inn.root
         out.writeall()
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
 
     def testidoc01(self):
         filenamein = 'botssys/infile/unitinisout/org/inisout01.idoc'
@@ -823,7 +823,7 @@ class Testinisoutinh(unittest.TestCase):
                                          filename=filenameout, divtext='', topartner='')  # make outmessage object
         out.root = inn.root
         out.writeall()
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
 
 
 class Testinisoutx12(unittest.TestCase):
@@ -864,14 +864,14 @@ class Testinisoutcsv(unittest.TestCase):
         filenamein = 'botssys/infile/unitinisout/org/inisout01.csv'
         filenameout = 'botssys/infile/unitinisout/output/inisout01.csv'
         utilsunit.readwrite(editype='csv', messagetype='invoic', filenamein=filenamein, filenameout=filenameout)
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
 
     def testcsv003(self):
         #utf-charset
         filenamein = 'botssys/infile/unitinisout/org/inisout03.csv'
         filenameout = 'botssys/infile/unitinisout/output/inisout03.csv'
         utilsunit.readwrite(editype='csv', messagetype='invoic', filenamein=filenamein, filenameout=filenameout)
-        self.failUnless(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
+        self.assertTrue(filecmp.cmp('bots/' + filenameout, 'bots/' + filenamein))
         #~ #utf-charset with BOM **error. BOM is not removed by python.
         #~ #utilsunit.readwrite(editype='csv',
         #~ #            messagetype='invoic',

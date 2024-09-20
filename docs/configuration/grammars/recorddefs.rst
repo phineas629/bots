@@ -125,9 +125,9 @@ A grammar does not contains the position/offset of each field in a fixed record,
         for key, record in recorddefs.items():
             length = 0
             for field in record:
-                print '           ', field, '      #pos',length+1, length + field[2]
+                print('           ', field, '      #pos',length+1, length + field[2]
                 length += field[2]
-            print 'Record',key,'  has length ',length, '\n'
+            print('Record',key,'  has length ',length, '\n'
 
 Slightly different version - output can be pasted back into grammar
 
@@ -140,10 +140,10 @@ Slightly different version - output can be pasted back into grammar
                 space = max(space,len(str(field))+1)
         for key, record in recorddefs.items():
             length = 0
-            print '    \'' + key + '\':['
+            print('    \'' + key + '\':['
             for field in record:
-                print '           ', (str(field) + ',').ljust(space), ' # pos',length+1, '-', length + field[2]
+                print('           ', (str(field) + ',').ljust(space), ' # pos',length+1, '-', length + field[2]
                 length += field[2]
-            print '    ],'
+            print('    ],'
 
 

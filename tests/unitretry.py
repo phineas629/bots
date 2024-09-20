@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 import sys
 import subprocess
 import logging
-import utilsunit
+from . import utilsunit
 import bots.botslib as botslib
 import bots.botsinit as botsinit
 import bots.botsglobal as botsglobal
 from bots.botsconfig import *
 if sys.version_info[0] > 2:
-    basestring = unicode = str
+    str = str = str
 
 #plugin unitretry.zip
 #activate routes
@@ -25,7 +25,7 @@ if sys.version_info[0] > 2:
 
 
 def change_communication_type(idchannel, to_type):
-    botslib.changeq(u'''UPDATE channel
+    botslib.changeq('''UPDATE channel
                         SET type = %(to_type)s
                         WHERE idchannel = %(idchannel)s
                         ''', {'to_type': to_type, 'idchannel': idchannel})
@@ -39,12 +39,12 @@ def scriptwrite(path, content):
 
 def indicate_rereceive():
     count = 0
-    for row in botslib.query(u'''SELECT idta
+    for row in botslib.query('''SELECT idta
                             FROM    filereport
                             ORDER BY idta DESC
                             '''):
         count += 1
-        botslib.changeq(u'''UPDATE filereport
+        botslib.changeq('''UPDATE filereport
                             SET retransmit = 1
                             WHERE idta=%(idta)s
                             ''', {'idta': row[str('idta')]})
@@ -54,13 +54,13 @@ def indicate_rereceive():
 
 def indicate_send():
     count = 0
-    for row in botslib.query(u'''SELECT idta
+    for row in botslib.query('''SELECT idta
                             FROM    ta
                             WHERE status=%(status)s
                             ORDER BY idta DESC
                             ''', {'status': EXTERNOUT}):
         count += 1
-        botslib.changeq(u'''UPDATE ta
+        botslib.changeq('''UPDATE ta
                             SET retransmit = %(retransmit)s
                             WHERE idta=%(idta)s
                             ''', {'retransmit': True, 'idta': row[str('idta')]})

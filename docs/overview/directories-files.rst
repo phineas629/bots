@@ -4,10 +4,10 @@ Directories and Files
 **Where can I find bots on my system?**
 
 * Windows (depends upon python version used):
-    * eg. ``C:\python27\Lib\site-packages\bots``
+    * eg. ``C:\python37\Lib\site-packages\bots``
 * Linux, Unix:
-    * ``/usr/lib/python2.7/site-packages/bots``
-    * ``/usr/local/lib/python2.7/dist-packages/bots (Debian, Ubuntu)``
+    * ``/usr/lib/python3.7/site-packages/bots``
+    * ``/usr/local/lib/python3.7/dist-packages/bots (Debian, Ubuntu)``
 
 .. note::
     In the main screen (home) of bots-monitor (GUI) you can see where the bots-directories are. 
@@ -15,7 +15,7 @@ Directories and Files
 **Where are the programs/executable scripts?**
 
 * Where installed
-    * Windows (depends upon python version used): ``C:\python27\Scripts``
+    * Windows (depends upon python version used): ``C:\python37\Scripts``
     * Linux, Unix eg in ``/usr/bin/`` or ``/usr/local/bin/``
 * Overview of executables:
     * ``bots-webserver.py`` - serves the html-pages for the bots-monitor.

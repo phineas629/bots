@@ -27,7 +27,7 @@ Changes
     #. Added http(s) communication to communication methods (using 'requests' library).
     #. Better reporting of partnerID for incoming files with errors.
     #. File rename after outcommunication using tmp filenames to avoid 'reading before writing'.
-    #. Updated edifax (print to html); is much easier to use now (edifax plugin will be updated).
+    #. Updated edifax (print(to html); is much easier to use now (edifax plugin will be updated).
 
     **Interface (GUI)**
 

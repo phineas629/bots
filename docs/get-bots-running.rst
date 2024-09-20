@@ -31,7 +31,7 @@ Start bots-monitor (using bots-webserver)
 #. Start bots-webserver (several options):
     * When bots is installed using with Windows installer use the 'shortcut' to Bots-webserver in your 'Programs' menu.
     * (\*nix) Command line: ``bots-webserver.py``
-    * (Windows, python 2.7) go to command line and: ``c:\python27\python c:\python27\Scripts\bots-webserver.py``
+    * (Windows, python 2.7) go to command line and: ``c:\python37\python c:\python37\Scripts\bots-webserver.py``
 #. Bots-webserver should stay running (and not disappear). If not, see `Start-up FAQ <get-bots-running.html#faq>`_.
 #. View using your Internet browser
     * When bots-webserver runs on the same computer, use address: http://localhost:8080
@@ -47,7 +47,7 @@ There are several ways to start bots-engine:
 
 #. (windows, \*nix) Start from bots-monitor: ``bots-monitor->Run->Run (only new)``
 #. (\*nix) Command line: ``bots-engine.py``
-#. (Windows, python 2.7) go to command line and: ``c:\python27\python c:\python27\Scripts\bots-engine.py``
+#. (Windows, python 2.7) go to command line and: ``c:\python37\python c:\python37\Scripts\bots-engine.py``
 
 The results of what bots-engine has done can be viewed in the bots-monitor.
 
@@ -58,7 +58,7 @@ FAQ
 ---
 
 * When starting bots-webserver the window disappears after a few seconds?
-    * Start the bots-webserver from the command line; you will be able to see what goes wrong. (Windows, python 2.7) go to command line and: ``c:\python27\python c:\python27\Scripts\bots-webserver.py``
+    * Start the bots-webserver from the command line; you will be able to see what goes wrong. (Windows, python 2.7) go to command line and: ``c:\python37\python c:\python37\Scripts\bots-webserver.py``
     * For the most common cause for the problem see the next question.
 * Bots-webserver gives error: IOError: Port 8080 not free on 'x.x.x.x' (or similar).
     * Another program already uses this 'port'.

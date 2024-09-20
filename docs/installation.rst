@@ -106,7 +106,7 @@ Installation on amazon EC2, looks like red hat version of linux
         $ sudo python setup.py install
         $ cd .. 
         #set rigths for bots directory to non-root:
-        $ sudo chown -R myusername /usr/lib/python2.6/site-packages/bots
+        $ sudo chown -R myusername /usr/lib/python3.6/site-packages/bots
  
         #start up bots-webserver:
         $ bots-webserver.py

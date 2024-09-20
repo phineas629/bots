@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 import filecmp
 import os
 import sys
@@ -10,14 +10,14 @@ import logging
 import subprocess
 import glob
 #import bots-modules
-import utilsunit
+from . import utilsunit
 import bots.botslib as botslib
 import bots.botsinit as botsinit
 import bots.botsglobal as botsglobal
 import bots.transform as transform
 from bots.botsconfig import *
 if sys.version_info[0] > 2:
-    basestring = unicode = str
+    str = str = str
 
 '''
 plugin 'unit_multi_1'
@@ -27,7 +27,7 @@ not an acceptance test.
 
 
 def test_plugin():
-    for row in botslib.query(u'''SELECT COUNT(*) as count
+    for row in botslib.query('''SELECT COUNT(*) as count
                                 FROM    partner
                                 WHERE   isgroup = %(isgroup)s ''',
                              {'isgroup': False}):
@@ -36,7 +36,7 @@ def test_plugin():
         break
     else:
         raise Exception('no partner count?')
-    for row in botslib.query(u'''SELECT COUNT(*) as count
+    for row in botslib.query('''SELECT COUNT(*) as count
                                 FROM    partner
                                 WHERE   isgroup = %(isgroup)s ''',
                              {'isgroup': True}):
@@ -45,7 +45,7 @@ def test_plugin():
         break
     else:
         raise Exception('no partner count?')
-    for row in botslib.query(u'''SELECT COUNT(*) as count
+    for row in botslib.query('''SELECT COUNT(*) as count
                                     FROM partnergroup
                                     WHERE from_partner_id=%(from_partner_id)s  ''',
                              {'from_partner_id': 'plugintest1'}):
@@ -54,13 +54,13 @@ def test_plugin():
         break
     else:
         raise Exception('no partner count?')
-    for row in botslib.query(u'''SELECT to_partner_id
+    for row in botslib.query('''SELECT to_partner_id
                                     FROM partnergroup
                                     WHERE from_partner_id=%(from_partner_id)s  ''',
                              {'from_partner_id': 'plugintest2'}):
         if row[str('to_partner_id')] != 'plugingroup2':
             raise Exception('error partner count')
-    for row in botslib.query(u'''SELECT COUNT(*) as count
+    for row in botslib.query('''SELECT COUNT(*) as count
                                     FROM partnergroup
                                     WHERE to_partner_id=%(to_partner_id)s  ''',
                              {'to_partner_id': 'plugingroup2'}):
@@ -73,51 +73,51 @@ def test_plugin():
 
 def test_ccode_with_unicode():
     domein = 'test'
-    tests = [(u'key1', u'leftcode'),
-             (u'key2', u'~!@#$%^&*()_+}{:";][=-/.,<>?`'),
-             (u'key3', u'?Èr˝˙ÌÛ?·s??lzcn?'),
-             (u'key4', u'?Î?ˇ¸Ôˆ‰¥®???Ë?˘Ï'),
-             (u'key5', u'Ú‡???UI’√?—`~'),
-             (u'key6', u"a\xac\u1234\u20ac\U00008000"),
-             (u'key7', u"abc_\u03a0\u03a3\u03a9.txt"),
-             (u'key8', u"?…R›⁄Õ”?¡S??LZCN??"),
-             (u'key9', u"À?®Y‹®Iœœ÷ƒ???»?ŸÃ“`¿`Z?"),
+    tests = [('key1', 'leftcode'),
+             ('key2', '~!@#$%^&*()_+}{:";][=-/.,<>?`'),
+             ('key3', '?√©r√Ω√∫√≠√≥?√°s??lzcn?'),
+             ('key4', '?√´?√ø√º√Ø√∂√§¬¥¬®???√®?√π√¨'),
+             ('key5', '√≤√†???UI√ï√É?√ë`~'),
+             ('key6', "a\xac\\u1234\\u20ac\\U00008000"),
+             ('key7', "abc_\\u03a0\\u03a3\\u03a9.txt"),
+             ('key8', "?√âR√ù√ö√ç√ì?√ÅS??LZCN??"),
+             ('key9', "√ã?¬®Y√ú¬®I√è√è√ñ√Ñ???√à?√ô√å√í`√Ä`Z?"),
              ]
     try:  # clean before test
-        botslib.changeq(u'''DELETE FROM ccode ''')
-        botslib.changeq(u'''DELETE FROM ccodetrigger''')
+        botslib.changeq('''DELETE FROM ccode ''')
+        botslib.changeq('''DELETE FROM ccodetrigger''')
     except:
-        print('Error while deleting: ', botslib.txtexc())
+        print(('Error while deleting: ', botslib.txtexc()))
         raise
     try:
-        botslib.changeq(u'''INSERT INTO ccodetrigger (ccodeid)
+        botslib.changeq('''INSERT INTO ccodetrigger (ccodeid)
                                 VALUES (%(ccodeid)s)''',
                         {'ccodeid': domein})
         for key, value in tests:
-            botslib.changeq(u'''INSERT INTO ccode (ccodeid_id,leftcode,rightcode,attr1,attr2,attr3,attr4,attr5,attr6,attr7,attr8)
+            botslib.changeq('''INSERT INTO ccode (ccodeid_id,leftcode,rightcode,attr1,attr2,attr3,attr4,attr5,attr6,attr7,attr8)
                                     VALUES (%(ccodeid)s,%(leftcode)s,%(rightcode)s,'1','1','1','1','1','1','1','1')''',
                             {'ccodeid': domein, 'leftcode': key, 'rightcode': value})
     except:
-        print('Error while updating: ', botslib.txtexc())
+        print(('Error while updating: ', botslib.txtexc()))
         raise
     try:
         for key, value in tests:
-            print('key', key)
-            for row in botslib.query(u'''SELECT rightcode
+            print(('key', key))
+            for row in botslib.query('''SELECT rightcode
                                         FROM    ccode
                                         WHERE   ccodeid_id = %(ccodeid)s
                                         AND     leftcode = %(leftcode)s''',
                                      {'ccodeid': domein, 'leftcode': key}):
-                print('    ', key, type(row[str('rightcode')]), type(value))
+                print(('    ', key, type(row[str('rightcode')]), type(value)))
                 if row[str('rightcode')] != value:
-                    print('failure in test "%s": result "%s" is not equal to "%s"' % (key, row['rightcode'], value))
+                    print(('failure in test "%s": result "%s" is not equal to "%s"' % (key, row['rightcode'], value)))
                 else:
                     print('    OK')
                 break
             else:
-                print('??can not find testentry %s %s in db' % (key, value))
+                print(('??can not find testentry %s %s in db' % (key, value)))
     except:
-        print('Error while quering db: ', botslib.txtexc())
+        print(('Error while quering db: ', botslib.txtexc()))
         raise
 
 

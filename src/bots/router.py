@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+
 import sys
 if sys.version_info[0] > 2:
-    basestring = unicode = str
-from django.utils.translation import ugettext as _
+    str = str = str
+from django.utils.translation import gettext as _
 #bots-modules
 from . import automaticmaintenance
 from . import botslib
@@ -179,7 +179,7 @@ class new(object):
                        'messagetype': routedict['tomessagetype'],
                        'testindicator': routedict['testindicator'],
                        }
-            towhere = dict((key, value) for key, value in towhere.items() if value)  # remove nul-values from dict
+            towhere = dict((key, value) for key, value in list(towhere.items()) if value)  # remove nul-values from dict
             wherestring = ' AND '.join(key + '=%(' + key + ')s ' for key in towhere)
             # use frompartner_tochannel in where-clause of query (partner/group dependent outchannel
             if routedict['frompartner_tochannel_id']:

@@ -73,7 +73,7 @@ Changes
         #sendreportifprocesserror : do not send a report by mail if only process errors occurred. useful if outcommunication often gives error. default= True (send if there is a process error)
         sendreportifprocesserror = True
 
-        #imap4debug: print detailed information about imap4 session(s). Default 0 (no debug) (can use 0,1,2,3,4,5)
+        #imap4debug: print(detailed information about imap4 session(s). Default 0 (no debug) (can use 0,1,2,3,4,5)
         imap4debug=0
 
         [webserver]

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+
 import sys
 import copy
 import datetime
 import re
 import django
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from . import models
 from . import botsglobal
 from .botsconfig import *
@@ -89,7 +89,7 @@ def django_trace_origin(idta, where):
         '''
         for parent in get_parent(ta_object):
             donelijst.append(parent.idta)
-            for key, value in where.items():
+            for key, value in list(where.items()):
                 if getattr(parent, key) != value:
                     break
             else:  # all where-criteria are true; check if we already have this ta_object

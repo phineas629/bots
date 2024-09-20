@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
 import sys
 if sys.version_info[0] > 2:
-    basestring = unicode = str
-from django.utils.translation import ugettext as _
+    str = str = str
+from django.utils.translation import gettext as _
 #bots-modules
 from . import botslib
 from . import node
@@ -68,16 +68,16 @@ class Message(object):
             counter = 0
             for veld in lex_record:
                 if counter == 0:
-                    print('%s    (Record-id)' % (veld[VALUE]))
+                    print(('%s    (Record-id)' % (veld[VALUE])))
                 else:
                     if veld[SFIELD] == 0:
-                        print('    %s    (field)' % (veld[VALUE]))
+                        print(('    %s    (field)' % (veld[VALUE])))
                     elif veld[SFIELD] == 1:
-                        print('        %s    (sub)' % (veld[VALUE]))
+                        print(('        %s    (sub)' % (veld[VALUE])))
                     elif veld[SFIELD] == 2:
-                        print('        %s    (rep)' % (veld[VALUE]))
+                        print(('        %s    (rep)' % (veld[VALUE])))
                     else:
-                        print('    %s    (???)' % (veld[VALUE]))
+                        print(('    %s    (???)' % (veld[VALUE])))
                 counter += 1
 
     @staticmethod
@@ -239,7 +239,7 @@ class Message(object):
                         if value is None:
                             value = ''
                         else:
-                            value = unicode(value).strip()
+                            value = str(value).strip()
                             if value:
                                 repeating_field_has_data = True
                         newlist.append(self._formatfield(value, field_definition, record_definition, node_instance))
@@ -302,15 +302,15 @@ class Message(object):
                         #check each dict, convert values to unicode
                         #also: check if dict has data at all
                         composite_has_data = False
-                        for key, value in comp.items():
-                            if not isinstance(key, basestring):
+                        for key, value in list(comp.items()):
+                            if not isinstance(key, str):
                                 raise botslib.MappingFormatError(
                                     _('Repeating composite: keys must be strings: put(%(mpath)s)'), {'mpath': valuelist})
                             if value is None:
                                 comp[key] = ''
                             else:
                                 # leading and trailing spaces are stripped from the values
-                                comp[key] = unicode(value).strip()
+                                comp[key] = str(value).strip()
                                 if comp[key]:
                                     composite_has_data = True
                         if composite_has_data:
@@ -344,7 +344,7 @@ class Message(object):
 
     @staticmethod
     def _logfieldcontent(noderecord):
-        for key, value in noderecord.items():
+        for key, value in list(noderecord.items()):
             if key not in ['BOTSID', 'BOTSIDnr']:
                 botsglobal.logger.debug('    "%(key)s" : "%(value)s"', {'key': key, 'value': value})
 

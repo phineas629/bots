@@ -125,7 +125,7 @@ The class 'file' subclasses the standard 'file' method of bots.
     class file(communication.file):
         def connect(self,*args,**kwargs):
             #do the preparing work
-            print 'in connect method'
+            print('in connect method'
 
 **Example 2**: 
 In this case communication-type of the channel is 'ftp'. The class 'ftp' subclasses the standard 'ftp' method of bots. The 'outcommunicate' method of the ftp class is taken over with this implementation.
@@ -366,7 +366,7 @@ In this example the 'main' script is called for each outgoing file.
 
 **Example 5: outgoing files to a printer**
 
-Send data (eg. ZPL code to print fancy labels) directly to a Windows configured printer. The printer can be defined in Windows either as "Generic/Text Only" or with the proper driver, because this script just sends raw data, bypassing the driver.
+Send data (eg. ZPL code to print(fancy labels) directly to a Windows configured printer. The printer can be defined in Windows either as "Generic/Text Only" or with the proper driver, because this script just sends raw data, bypassing the driver.
 
 | Dependencies: Requires pywin32
 | Reference: http://timgolden.me.uk/pywin32-docs/win32print.html

@@ -39,23 +39,23 @@ Scheduling Bots-Engine
 
     .. code-block:: bat
 
-        c:\python27\python c:\python27\Scripts\bots-engine.py --new
+        c:\python37\python c:\python37\Scripts\bots-engine.py --new
 
-        c:\python27\python c:\python27\Scripts\bots-engine.py "my hourly route"
+        c:\python37\python c:\python37\Scripts\bots-engine.py "my hourly route"
 
 * If you have few routes but with varying schedules, then schedule them individually (by putting route names on the command line). Disadvantage: newly added routes are not automatically run, you must adjust your schedule.
 
     .. code-block:: bat
 
-        c:\python27\python c:\python27\Scripts\bots-engine.py "my orders route" "my invoice route"
+        c:\python37\python c:\python37\Scripts\bots-engine.py "my orders route" "my invoice route"
 
-        c:\python27\python c:\python27\Scripts\bots-engine.py "my daily route"
+        c:\python37\python c:\python37\Scripts\bots-engine.py "my daily route"
 
 * Consider whether you need to schedule retries periodically. Particularly with accessing remote servers, sometimes there may be communication errors that would be ok next time bots tries. Otherwise you will need to retry these yourself. File errors are not retried automatically because the same error will just come up again!
 
     .. code-block:: bat
 
-        c:\python27\python c:\python27\Scripts\bots-engine.py --automaticretrycommunication
+        c:\python37\python c:\python37\Scripts\bots-engine.py --automaticretrycommunication
 
 
 .. rubric::
@@ -76,30 +76,30 @@ Each task has a corresponding batch file in the scripts directory. This makes ta
     :: bots-engine.bat
 
     :: Regular run of bots engine (eg. every 5 minutes, highest priority)
-    C:\python27\python.exe C:\python27\scripts\bots-job2queue.py -p1 C:\python27\python.exe C:\python27\scripts\bots-engine.py --new
+    C:\python37\python.exe C:\python37\scripts\bots-job2queue.py -p1 C:\python37\python.exe C:\python37\scripts\bots-engine.py --new
 
 .. code-block:: bat
 
     :: bots-engine-hourly.bat
 
     :: Hourly monitoring alerts
-    C:\python27\python.exe C:\python27\scripts\bots-job2queue.py -p2 C:\python27\python.exe C:\python27\scripts\bots-engine.py hourly_alerts
+    C:\python37\python.exe C:\python37\scripts\bots-job2queue.py -p2 C:\python37\python.exe C:\python37\scripts\bots-engine.py hourly_alerts
 
     :: Hourly cleanup and low priority routes
-    C:\python27\python.exe C:\python27\scripts\bots-job2queue.py -p6 C:\python27\python.exe C:\python27\scripts\bots-engine.py ftp_cleanup ProductionOrders RemitAdvice
+    C:\python37\python.exe C:\python37\scripts\bots-job2queue.py -p6 C:\python37\python.exe C:\python37\scripts\bots-engine.py ftp_cleanup ProductionOrders RemitAdvice
 
     :: automatic retry of failed outgoing communication
-    C:\python27\python.exe C:\python27\scripts\bots-job2queue.py -p7 C:\python27\python.exe C:\python27\scripts\bots-engine.py --automaticretrycommunication
+    C:\python37\python.exe C:\python37\scripts\bots-job2queue.py -p7 C:\python37\python.exe C:\python37\scripts\bots-engine.py --automaticretrycommunication
 
 .. code-block:: bat
 
     :: bots-engine-daily.bat
 
     :: daily housekeeping
-    C:\python27\python.exe C:\python27\scripts\bots-job2queue.py -p3 C:\python27\python.exe C:\python27\scripts\bots-engine.py daily_housekeeping
+    C:\python37\python.exe C:\python37\scripts\bots-job2queue.py -p3 C:\python37\python.exe C:\python37\scripts\bots-engine.py daily_housekeeping
 
     :: daily reporting &amp; SAP data downloads
-    C:\python27\python.exe C:\python27\scripts\bots-job2queue.py -p9 C:\python27\python.exe C:\python27\scripts\bots-engine.py daily_reports SAP_Expired_Contracts
+    C:\python37\python.exe C:\python37\scripts\bots-job2queue.py -p9 C:\python37\python.exe C:\python37\scripts\bots-engine.py daily_reports SAP_Expired_Contracts
 
 Job Queue Server(bots >= 3.0)
 -----------------------------
@@ -146,19 +146,19 @@ Details:
 
     .. code-block:: bat
 
-        c:\python27\python c:\python27\Scripts\bots-job2queue.py c:\python27\python c:\python27\Scripts\bots-engine.py
+        c:\python37\python c:\python37\Scripts\bots-job2queue.py c:\python37\python c:\python37\Scripts\bots-engine.py
 
     Job2queue on windows example 2:
 
     .. code-block:: bat 
 
-        c:\python27\python c:\python27\Scripts\bots-job2queue.py -p3 c:\python27\python c:\python27\Scripts\bots-engine.py --new -Cconfigprod
+        c:\python37\python c:\python37\Scripts\bots-job2queue.py -p3 c:\python37\python c:\python37\Scripts\bots-engine.py --new -Cconfigprod
 
     Job2queue on windows example  3 (Adding other commands to the job queue):
 
     .. code-block:: bat
 
-        c:\python27\python c:\python27\Scripts\bots-job2queue.py c:\program files\my_program.exe my_parm_1 my_parm_2
+        c:\python37\python c:\python37\Scripts\bots-job2queue.py c:\program files\my_program.exe my_parm_1 my_parm_2
 
     Job2queue on linux example 4:
 
