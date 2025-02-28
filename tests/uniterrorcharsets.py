@@ -37,11 +37,11 @@ def _testraise(expect_txt, *args, **kwargs):
         error_value = getattr(msg, 'value', str(msg))
         
         if expect_txt and error_value != expect_txt:
-            print('Error,expect "%s" but got "%s"' % (expect_txt, error_value))
+            print(('Error,expect "%s" but got "%s"' % (expect_txt, error_value)))
         if isinstance(error_value, str):
             pass
         else:
-            print('Error,expect string but got %s' % type(error_value))
+            print(('Error,expect string but got %s' % type(error_value)))
 
 
 # .decode(): bytes->unicode
@@ -118,7 +118,7 @@ class TestErrorCharsets(unittest.TestCase):
         for i in range(0, 1000):  # Limit to a safe range
             l.append(chr(i))
         s = ''.join(l)
-        print(type(s))
+        print((type(s)))
         _testraise('', s)
 
 

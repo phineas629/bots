@@ -6,7 +6,7 @@ if sys.version_info[0] > 2:
     str = str = str
     import configparser
 else:
-    import ConfigParser as configparser
+    import configparser as configparser
 import os
 import encodings
 import codecs
