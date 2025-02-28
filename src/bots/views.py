@@ -781,3 +781,10 @@ def sendtestmail(request, *kw, **kwargs):
 
 def user(request, *kw, **kwargs):
     return django.shortcuts.redirect(reverse('home'))
+
+# Add a login success view to handle redirects
+from django.shortcuts import redirect
+
+def login_success(request):
+    """Redirect to appropriate page after successful login."""
+    return redirect('home')

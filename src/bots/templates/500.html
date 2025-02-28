@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans 'Server Error' %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{% trans 'Server Error' %}</h1>
+    <p>{% trans 'There was an error processing your request. The error has been logged and the administrators have been notified.' %}</p>
+    
+    {% if exc_info %}
+    <div class="error-details">
+        <h2>{% trans 'Error Details' %}</h2>
+        <pre>{{ exc_info }}</pre>
+    </div>
+    {% endif %}
+    
+    <p><a href="/" class="button">{% trans 'Return to homepage' %}</a></p>
+</div>
+{% endblock %}

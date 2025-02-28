@@ -28,3 +28,9 @@ __version__ = '3.3.1.dev0'  # Update this version number as needed
 #     print(f"Error importing specific functions: {e}")
 
 # Add any other necessary imports or initializations here
+
+# Import signals to register signal handlers
+try:
+    import bots.signals
+except ImportError:
+    pass

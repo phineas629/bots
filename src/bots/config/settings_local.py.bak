@@ -1,0 +1,13 @@
+
+import os
+
+# Add the correct template directories
+TEMPLATES[0]['DIRS'] = [
+    '/app/bots/src/bots/templates',
+    # Keep the original directory as fallback
+    '/usr/local/lib/python3.9/site-packages/bots-3.3.1.dev0-py3.9.egg/bots/templates'
+]
+
+# Debug settings
+DEBUG = True
+TEMPLATE_DEBUG = True
