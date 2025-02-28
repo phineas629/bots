@@ -10,3 +10,11 @@
 20250228 10:53:57 STARTINFO: Bots jobqueue configdir: "/app/bots/src/bots/config".
 20250228 10:53:57 STARTINFO: Bots jobqueue listens for xmlrpc at port: "28081".
 20250228 10:53:57 INFO     : Jobqueue server started.
+20250228 11:08:09 STARTINFO: Bots jobqueue started.
+20250228 11:08:09 STARTINFO: Bots jobqueue configdir: "/app/bots/src/bots/config".
+20250228 11:08:09 STARTINFO: Bots jobqueue listens for xmlrpc at port: "28081".
+20250228 11:08:09 INFO     : Jobqueue server started.
+20250228 11:27:55 STARTINFO: Bots jobqueue started.
+20250228 11:27:55 STARTINFO: Bots jobqueue configdir: "/app/bots/src/bots/config".
+20250228 11:27:55 STARTINFO: Bots jobqueue listens for xmlrpc at port: "28081".
+20250228 11:27:55 INFO     : Jobqueue server started.
