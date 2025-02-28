@@ -18,8 +18,9 @@ import bots.botsinit as botsinit
 import bots.botsglobal as botsglobal
 import bots.inmessage as inmessage
 import bots.outmessage as outmessage
+# Python 3 compatibility - remove redundant assignment
 if sys.version_info[0] > 2:
-    str = str = str
+    pass  # str is already a unicode string type in Python 3
 
 '''
 pluging unitinisout.zip

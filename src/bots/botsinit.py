@@ -175,10 +175,14 @@ def connect():
     ''' connect to database for non-django modules eg engine '''
     if botsglobal.settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
         #sqlite has some more fiddling; in separate file. Mainly because of some other method of parameter passing.
-        if not os.path.isfile(botsglobal.settings.DATABASES['default']['NAME']):
-            raise botslib.PanicError('Could not find database file for SQLite')
+        db_path = botsglobal.settings.DATABASES['default']['NAME']
+        db_dir = os.path.dirname(db_path)
+        # Create directory if it doesn't exist
+        if not os.path.exists(db_dir):
+            os.makedirs(db_dir)
+        # For SQLite, we can create the database file if it doesn't exist
         from . import botssqlite
-        botsglobal.db = botssqlite.connect(database=botsglobal.settings.DATABASES['default']['NAME'])
+        botsglobal.db = botssqlite.connect(database=db_path)
     elif botsglobal.settings.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
         import MySQLdb
         from MySQLdb import cursors

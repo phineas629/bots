@@ -1,0 +1,23 @@
+20250228 04:13:45 INFO     engine : served at port: "9000".
+20250228 04:13:45 INFO     engine : platform: "Linux-6.4.16-linuxkit-aarch64-with-glibc2.36".
+20250228 04:13:45 INFO     engine : machine: "aarch64".
+20250228 04:13:45 INFO     engine : python version: "3.9.21".
+20250228 04:13:45 INFO     engine : django version: "(3, 2, 0, 'final', 0)".
+20250228 04:13:45 INFO     engine : bots version: "3.3.1.dev0".
+20250228 04:13:45 INFO     engine : bots installation path: "/app/bots/src/bots".
+20250228 04:13:45 INFO     engine : config path: "/app/bots/src/bots/config".
+20250228 04:13:45 INFO     engine : botssys path: "/app/bots/src/bots/botssys".
+20250228 04:13:45 INFO     engine : usersys path: "/app/bots/src/bots/usersys".
+20250228 04:13:45 INFO     engine : DATABASE_ENGINE: "django.db.backends.postgresql".
+20250228 04:13:45 INFO     engine : DATABASE_NAME: "botsdb".
+20250228 04:13:45 INFO     engine : DATABASE_USER: "bots".
+20250228 04:13:45 INFO     engine : DATABASE_HOST: "postgres".
+20250228 04:13:45 INFO     engine : DATABASE_PORT: "5432".
+20250228 04:13:45 INFO     engine : DATABASE_OPTIONS: "{}".
+20250228 04:13:45 ERROR    engine : Could not connect to database. Database settings are in bots/config/settings.py. Error: "Unknown database engine "django.db.backends.postgresql".".
+Traceback (most recent call last):
+  File "/app/bots/src/bots/engine.py", line 142, in start
+    botsinit.connect()
+  File "/app/bots/src/bots/botsinit.py", line 209, in connect
+    raise botslib.PanicError('Unknown database engine "%(engine)s".', {
+bots.botslib.PanicError: Unknown database engine "django.db.backends.postgresql".

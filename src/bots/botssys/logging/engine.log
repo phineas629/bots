@@ -1,0 +1,69 @@
+20250228 04:48:27 INFO     engine : served at port: "9000".
+20250228 04:48:27 INFO     engine : platform: "Linux-6.4.16-linuxkit-aarch64-with-glibc2.36".
+20250228 04:48:27 INFO     engine : machine: "aarch64".
+20250228 04:48:27 INFO     engine : python version: "3.9.21".
+20250228 04:48:27 INFO     engine : django version: "(3, 2, 0, 'final', 0)".
+20250228 04:48:27 INFO     engine : bots version: "3.3.1.dev0".
+20250228 04:48:27 INFO     engine : bots installation path: "/app/bots/src/bots".
+20250228 04:48:27 INFO     engine : config path: "/app/bots/src/bots/config".
+20250228 04:48:27 INFO     engine : botssys path: "/app/bots/src/bots/botssys".
+20250228 04:48:27 INFO     engine : usersys path: "/app/bots/src/bots/usersys".
+20250228 04:48:27 INFO     engine : DATABASE_ENGINE: "django.db.backends.postgresql_psycopg2".
+20250228 04:48:27 INFO     engine : DATABASE_NAME: "botsdb".
+20250228 04:48:27 INFO     engine : DATABASE_USER: "bots".
+20250228 04:48:27 INFO     engine : DATABASE_HOST: "postgres".
+20250228 04:48:27 INFO     engine : DATABASE_PORT: "5432".
+20250228 04:48:27 INFO     engine : DATABASE_OPTIONS: "{}".
+20250228 04:48:27 INFO     engine : Connected to database.
+20250228 04:48:27 DEBUG    engine : No import of module "/app/bots/src/bots/usersys/routescripts/botsengine": No module named 'bots.usersys.routescripts.botsengine'.
+20250228 04:48:27 INFO     engine : This run is an acceptance test - as indicated in option "runacceptancetest" in bots.ini.
+20250228 04:48:27 DEBUG    engine : No import of module "/app/bots/src/bots/usersys/routescripts/bots_acceptancetest": No module named 'bots.usersys.routescripts.bots_acceptancetest'.
+20250228 04:48:27 INFO     engine : In acceptance test there is no script file "bots_acceptancetest.py" to check the results of the acceptance test.
+20250228 04:48:27 CRITICAL engine : !Bots database is locked!
+Bots-engine has ended in an unexpected way during the last run.
+Most likely causes: sudden power-down, system crash, problems with disk I/O, bots-engine terminated by user, etc.
+Bots will do an automatic crash recovery now.
+20250228 04:48:27 INFO     engine : Run "crashrecovery".
+20250228 04:48:27 INFO     engine : Run all active routes from database: "['cms1500_to_837p']".
+20250228 04:48:27 DEBUG    engine : Error in process: psycopg2.errors.UndefinedFunction: operator does not exist: character varying = integer
+LINE 4:                                     AND script = 0 
+                                                       ^
+HINT:  No operator matches the given name and argument types. You might need to add explicit type casts.
+
+
+20250228 04:48:27 ERROR    engine : Severe error in bots system:
+current transaction is aborted, commands ignored until end of transaction block
+Traceback (most recent call last):
+  File "/app/bots/src/bots/botslib.py", line 371, in wrapper
+    terug = func(*args, **argv)
+  File "/app/bots/src/bots/router.py", line 25, in rundispatcher
+    if botsglobal.currentrun.run():
+  File "/app/bots/src/bots/router.py", line 264, in run
+    for row in botslib.query('''SELECT MAX(idta) as crashed_idta
+  File "/app/bots/src/bots/botslib.py", line 228, in query
+    cursor.execute(querystring, *args)
+  File "/usr/local/lib/python3.9/site-packages/psycopg2/extras.py", line 146, in execute
+    return super().execute(query, vars)
+psycopg2.errors.UndefinedFunction: operator does not exist: character varying = integer
+LINE 4:                                     AND script = 0 
+                                                       ^
+HINT:  No operator matches the given name and argument types. You might need to add explicit type casts.
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/bots/src/bots/engine.py", line 249, in start
+    errorinrun += router.rundispatcher(command, use_routestorun)
+  File "/app/bots/src/bots/botslib.py", line 375, in wrapper
+    ta_process.update(statust=ERROR, errortext=txt)
+  File "/app/bots/src/bots/botslib.py", line 152, in update
+    super(NewProcess, self).update(**ta_info)
+  File "/app/bots/src/bots/botslib.py", line 68, in update
+    changeq('''UPDATE ta
+  File "/app/bots/src/bots/botslib.py", line 239, in changeq
+    cursor.execute(querystring, *args)
+  File "/usr/local/lib/python3.9/site-packages/psycopg2/extras.py", line 146, in execute
+    return super().execute(query, vars)
+psycopg2.errors.InFailedSqlTransaction: current transaction is aborted, commands ignored until end of transaction block
+

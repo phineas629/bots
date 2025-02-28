@@ -6,6 +6,7 @@ import unittest
 import subprocess
 import logging
 import datetime
+import sys
 from . import utilsunit
 import bots.botslib as botslib
 import bots.botsinit as botsinit
@@ -25,7 +26,13 @@ botssys = 'bots/botssys'
 
 
 class TestMain(unittest.TestCase):
-
+    def setUp(self):
+        # Initialize botsglobal.ini before tests
+        botsinit.generalinit('config')
+        botsinit.initenginelogging('engine')
+        # Connect to the database
+        botsinit.connect()
+        
     def testroutetestmdn(self):
         comclass = communication._comsession(channeldict={
                                              'idchannel': 'dutchic_desadv_out'}, idroute='dutchic_desadv', userscript=None, scriptname=None, command='new', rootidta=0)

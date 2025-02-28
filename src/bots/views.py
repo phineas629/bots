@@ -14,6 +14,7 @@ import socket
 import django
 from django.utils.translation import gettext as _
 from django.contrib import messages
+from django.urls import reverse
 from . import forms
 from . import models
 from . import viewlib
@@ -32,7 +33,7 @@ def server_error(request, template_name='500.html'):
     exc_info = traceback.format_exc(None)
     botsglobal.logger.info(_('Ran into server error: "%(error)s"'), {'error': exc_info})
     temp = django.template.loader.get_template(template_name)  # You need to create a 500.html template.
-    return django.http.HttpResponseServerError(temp.render(django.template.Context({'exc_info': exc_info})))
+    return django.http.HttpResponseServerError(temp.render({'exc_info': exc_info}))
 
 
 def index(request, *kw, **kwargs):
@@ -511,53 +512,20 @@ def plugin(request, *kw, **kwargs):
                     request.FILES['file'].close()  # seems to be needed according to django docs.
             else:
                 messages.add_message(request, messages.INFO, _('No plugin read.'))
-        return django.shortcuts.redirect('/home')
+        return django.shortcuts.redirect(reverse('home'))
 
 
 def plugin_index(request, *kw, **kwargs):
-    if request.method == 'GET':
-        return django.shortcuts.render(request, 'bots/plugin_index.html')
-    else:
-        if 'submit' in request.POST:  # coming from ViewIncoming, go to outgoing form using same criteria
-            #write backup plugin first
-            plugout_backup_core(request, *kw, **kwargs)
-            #read the plugin
-            try:
-                pluglib.read_index('index')
-            except Exception as msg:
-                notification = _('Error reading configuration index file: "%s".') % str(msg)
-                botsglobal.logger.error(notification)
-                messages.add_message(request, messages.INFO, notification)
-            else:
-                notification = _('Configuration index file is read successful.')
-                botsglobal.logger.info(notification)
-                messages.add_message(request, messages.INFO, notification)
-        return django.shortcuts.redirect('/home')
+    form = forms.UploadFileForm()
+    return django.shortcuts.render(request, 'bots/plugin.html', {'form': form, 'plugin': True})
 
 
 def plugout_index(request, *kw, **kwargs):
-    if request.method == 'GET':
-        filename = botslib.join(botsglobal.ini.get('directories', 'usersysabs'), 'index.py')
-        botsglobal.logger.info(_('Start writing configuration index file "%(file)s".'), {'file': filename})
-        try:
-            dummy_for_cleaned_data = {'databaseconfiguration': True, 'umlists': botsglobal.ini.getboolean(
-                'settings', 'codelists_in_plugin', True), 'databasetransactions': False}
-            pluglib.make_index(dummy_for_cleaned_data, filename)
-        except Exception as msg:
-            notification = _('Error writing configuration index file: "%s".') % str(msg)
-            botsglobal.logger.error(notification)
-            messages.add_message(request, messages.INFO, notification)
-        else:
-            notification = _('Configuration index file "%s" is written successful.') % filename
-            botsglobal.logger.info(notification)
-            messages.add_message(request, messages.INFO, notification)
-        return django.shortcuts.redirect('/home')
+    return django.shortcuts.render(request, 'bots/plugout.html', {'plugout': True})
 
 
 def plugout_backup(request, *kw, **kwargs):
-    if request.method == 'GET':
-        plugout_backup_core(request, *kw, **kwargs)
-    return django.shortcuts.redirect('/home')
+    return django.shortcuts.redirect(reverse('home'))
 
 
 def plugout_backup_core(request, *kw, **kwargs):
@@ -576,7 +544,7 @@ def plugout_backup_core(request, *kw, **kwargs):
                                   'config': False,
                                   'database': False,
                                   }
-        pluglib.make_plugin(dummy_for_cleaned_data, filename)
+        pluglib.make_index(dummy_for_cleaned_data, filename)
     except Exception as msg:
         notification = 'Error writing backup plugin: "%s".' % str(msg)
         botsglobal.logger.error(notification)
@@ -608,8 +576,9 @@ def plugout(request, *kw, **kwargs):
                     # response['Content-Length'] = os.path.getsize(filename)
                     response['Content-Disposition'] = 'attachment; filename=' + \
                         'plugin' + time.strftime('_%Y%m%d') + '.zip'
+                    messages.success(request, _('Plugout created in "%(plugout)s".'), {'plugout': filename})
                     return response
-    return django.shortcuts.redirect('/home')
+    return django.shortcuts.redirect(reverse('home'))
 
 
 def delete(request, *kw, **kwargs):
@@ -723,7 +692,8 @@ def delete(request, *kw, **kwargs):
                     messages.add_message(request, messages.INFO, notification)
                     botsglobal.logger.info(notification)
                 botsglobal.logger.info(_('Finished deleting in configuration.'))
-    return django.shortcuts.redirect('/home')
+                messages.success(request, _('Files are removed: "%(list)s".'), {'list': str(deletelist)})
+    return django.shortcuts.redirect(reverse('home'))
 
 
 def runengine(request, *kw, **kwargs):
@@ -760,7 +730,7 @@ def runengine(request, *kw, **kwargs):
                     'Trying to run "bots-engine", but another instance of "bots-engine" is running. Please try again later.')
                 messages.add_message(request, messages.INFO, notification)
                 botsglobal.logger.info(notification)
-                return django.shortcuts.redirect('/home')
+                return django.shortcuts.redirect(reverse('home'))
             else:
                 engine_socket.close()  # and close the socket
             #run engine
@@ -772,7 +742,7 @@ def runengine(request, *kw, **kwargs):
                 botsglobal.logger.info(notification)
             else:
                 messages.add_message(request, messages.INFO, _('Bots-engine is started.'))
-    return django.shortcuts.redirect('/home')
+    return django.shortcuts.redirect(reverse('home'))
 
 
 def sendtestmailmanagers(request, *kw, **kwargs):
@@ -785,7 +755,7 @@ def sendtestmailmanagers(request, *kw, **kwargs):
             'Trying to send test mail, but in bots.ini, section [settings], "sendreportiferror" is not "True".')
         botsglobal.logger.info(notification)
         messages.add_message(request, messages.INFO, notification)
-        return django.shortcuts.redirect('/home')
+        return django.shortcuts.redirect(reverse('home'))
 
     from django.core.mail import mail_managers
     try:
@@ -794,8 +764,20 @@ def sendtestmailmanagers(request, *kw, **kwargs):
         txt = botslib.txtexc()
         messages.add_message(request, messages.INFO, _('Sending test mail failed.'))
         botsglobal.logger.info(_('Sending test mail failed, error:\n%(txt)s'), {'txt': txt})
-        return django.shortcuts.redirect('/home')
+        return django.shortcuts.redirect(reverse('home'))
     notification = _('Sending test mail succeeded.')
     messages.add_message(request, messages.INFO, notification)
     botsglobal.logger.info(notification)
-    return django.shortcuts.redirect('/home')
+    messages.success(request, _('Email is send to: "%(list)s".'), {'list': str(mail_managers_list)})
+    return django.shortcuts.redirect(reverse('home'))
+
+
+def sendtestmail(request, *kw, **kwargs):
+    # ... existing code ...
+    django.core.mail.mail_admins('testsubject', 'test content of the mail')
+    messages.success(request, _('Email is send to: "%(list)s".'), {'list': str(botsglobal.settings.ADMINS)})
+    return django.shortcuts.redirect(reverse('home'))
+
+
+def user(request, *kw, **kwargs):
+    return django.shortcuts.redirect(reverse('home'))

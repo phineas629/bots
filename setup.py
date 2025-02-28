@@ -35,10 +35,10 @@ def read(*names, **kwargs):
 
     Examples:
         >>> read('docs/readme.rst')
-            u'Overview\n--------\n...'
+            'Overview\n--------\n...'
 
         >>> read('docs', 'readme.rst')
-            u'Overview\n--------\n...'
+            'Overview\n--------\n...'
 
     """
     fn = os.path.join(os.path.dirname(__file__), *names)

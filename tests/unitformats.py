@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
-
 import unittest
 import sys
 import bots
@@ -106,7 +104,7 @@ class TestFormatFieldVariableOutmessage(unittest.TestCase):
                           tfield2, testdummy, nodedummy)  # too big with exp
         tfield3 = ['TEST1', 'M', 8, 'R', True, 3, 5, 'R']
         #no negative exponents for R
-        #print '\n>>>',self.edi._formatfield('12E-3',tfield3,testdummy,nodedummy)
+        #print('\n>>>',self.edi._formatfield('12E-3',tfield3,testdummy,nodedummy))
         self.assertEqual(self.edi._formatfield('12E-3', tfield3, testdummy, nodedummy),
                          '0.012', 'Exponent notation is possible')
         self.assertEqual(self.edi._formatfield('12e-3', tfield2, testdummy, nodedummy),
@@ -186,13 +184,13 @@ class TestFormatFieldVariableOutmessage(unittest.TestCase):
                           '-', tfield1, testdummy, nodedummy)  # no num
         # #test filling up to min length
         tfield23 = ['TEST1', 'M', 8, 'N', True, 0, 5, 'N']
-        # print self.edi._formatfield('12345.5',tfield23,testdummy,nodedummy)
+        # print(self.edi._formatfield('12345.5',tfield23,testdummy,nodedummy))
         self.assertEqual(self.edi._formatfield('12345.5', tfield23, testdummy, nodedummy), '12346', 'just large enough')
         tfield2 = ['TEST1', 'M', 8, 'N', True, 2, 5, 'N']
         self.assertEqual(self.edi._formatfield('123.45', tfield2, testdummy, nodedummy), '123.45', 'just large enough')
         self.assertEqual(self.edi._formatfield('123.4549', tfield2,
                                                testdummy, nodedummy), '123.45', 'just large enough')
-        # print self.edi._formatfield('123.455',tfield2,testdummy,nodedummy)
+        # print(self.edi._formatfield('123.455',tfield2,testdummy,nodedummy))
         self.assertEqual(self.edi._formatfield('123.455', tfield2, testdummy, nodedummy), '123.46', 'just large enough')
         self.assertEqual(self.edi._formatfield('0.1000', tfield2, testdummy, nodedummy),
                          '000.10', 'keep zeroes after last dec.digit')
@@ -277,11 +275,14 @@ class TestFormatFieldVariableOutmessage(unittest.TestCase):
         #~ #test filling up to min length
         tfield2 = ['TEST1', 'M', 8, 'I', True, 2, 5, 'I']
         self.assertEqual(self.edi._formatfield('123.45', tfield2, testdummy, nodedummy), '12345', 'just large enough')
-        self.assertEqual(self.edi._formatfield('123.4549', tfield2, testdummy, nodedummy), '12345', 'just large enough')
-        self.assertEqual(self.edi._formatfield('123.455', tfield2, testdummy, nodedummy), '12346', 'just large enough')
+        self.assertEqual(self.edi._formatfield('123.4549', tfield2, testdummy,
+                                               nodedummy), '12345', 'just large enough')
+        self.assertEqual(self.edi._formatfield('123.455', tfield2, testdummy,
+                                               nodedummy), '12346', 'just large enough')
         self.assertEqual(self.edi._formatfield('0.1000', tfield2, testdummy, nodedummy),
                          '00010', 'keep zeroes after last dec.digit')
-        self.assertEqual(self.edi._formatfield('00001', tfield2, testdummy, nodedummy), '00100', 'keep leading zeroes')
+        self.assertEqual(self.edi._formatfield('00001', tfield2, testdummy,
+                                               nodedummy), '00000100', 'keep leading zeroes')
         self.assertEqual(self.edi._formatfield('12', tfield2, testdummy, nodedummy), '01200', 'add leading zeroes')
         self.assertEqual(self.edi._formatfield('.1', tfield2, testdummy, nodedummy), '00010', 'add leading zeroes')
         #test exp; bots tries to convert to normal
@@ -469,7 +470,7 @@ class TestFormatFieldFixedOutmessage(unittest.TestCase):
         self.assertRaises(bots.botslib.MessageError, self.edi._formatfield, '12345678E+3',
                           tfield2, testdummy, nodedummy)  # too big with exp
         #no negative exponents for R
-        # #print '>>',self.edi._formatfield('12E-3',tfield2,testdummy,nodedummy)
+        # #print('>>',self.edi._formatfield('12E-3',tfield2,testdummy,nodedummy))
         self.assertEqual(self.edi._formatfield('12E-3', tfield2, testdummy, nodedummy),
                          '0000.012', 'Exponent notation is possible')
         self.assertEqual(self.edi._formatfield('12e-3', tfield2, testdummy, nodedummy),
@@ -577,7 +578,7 @@ class TestFormatFieldFixedOutmessage(unittest.TestCase):
         self.assertRaises(bots.botslib.MessageError, self.edi._formatfield, '12345678E+3',
                           tfield2, testdummy, nodedummy)  # too big with exp
         #no negative exponents for R
-        # #print '>>',self.edi._formatfield('12E-3',tfield2,testdummy,nodedummy)
+        # #print('>>',self.edi._formatfield('12E-3',tfield2,testdummy,nodedummy))
         self.assertEqual(self.edi._formatfield('12E-3', tfield2, testdummy, nodedummy),
                          '0.012   ', 'Exponent notation is possible')
         self.assertEqual(self.edi._formatfield('12e-3', tfield2, testdummy, nodedummy),
@@ -685,7 +686,7 @@ class TestFormatFieldFixedOutmessage(unittest.TestCase):
         self.assertRaises(bots.botslib.MessageError, self.edi._formatfield, '12345678E+3',
                           tfield2, testdummy, nodedummy)  # too big with exp
         #no negative exponents for R
-        # #print '>>',self.edi._formatfield('12E-3',tfield2,testdummy,nodedummy)
+        # #print('>>',self.edi._formatfield('12E-3',tfield2,testdummy,nodedummy))
         self.assertEqual(self.edi._formatfield('12E-3', tfield2, testdummy, nodedummy),
                          '   0.012', 'Exponent notation is possible')
         self.assertEqual(self.edi._formatfield('12e-3', tfield2, testdummy, nodedummy),

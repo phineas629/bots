@@ -5,7 +5,8 @@ import sys
 import sqlite3
 import re
 
-reformatparamstyle = re.compile('%\((?P<name>[^)]+)\)s')
+# Fix regex pattern with proper escaping for Python 3
+reformatparamstyle = re.compile(r'%\((?P<n>[^)]+)\)s')
 
 sqlite3.register_adapter(bool, int)  # python type -> SQL type
 sqlite3.register_converter(str('BOOLEAN'), lambda s: bool(int(s)))  # SQL type -> python type
@@ -37,4 +38,4 @@ class BotsCursor(sqlite3.Cursor):
         if parameters is None:
             sqlite3.Cursor.execute(self, string)
         else:
-            sqlite3.Cursor.execute(self, reformatparamstyle.sub(''':\g<name>''', string), parameters)
+            sqlite3.Cursor.execute(self, reformatparamstyle.sub(r':\g<n>', string), parameters)

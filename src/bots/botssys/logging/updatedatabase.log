@@ -1,0 +1,20 @@
+20250228 04:24:11 INFO     updatedatabase : served at port: "9000".
+20250228 04:24:11 INFO     updatedatabase : platform: "Linux-6.4.16-linuxkit-aarch64-with-glibc2.36".
+20250228 04:24:11 INFO     updatedatabase : machine: "aarch64".
+20250228 04:24:11 INFO     updatedatabase : python version: "3.9.21".
+20250228 04:24:11 INFO     updatedatabase : django version: "(3, 2, 0, 'final', 0)".
+20250228 04:24:11 INFO     updatedatabase : bots version: "3.3.1.dev0".
+20250228 04:24:11 INFO     updatedatabase : bots installation path: "/app/bots/src/bots".
+20250228 04:24:11 INFO     updatedatabase : config path: "/app/bots/src/bots/config".
+20250228 04:24:11 INFO     updatedatabase : botssys path: "/app/bots/src/bots/botssys".
+20250228 04:24:11 INFO     updatedatabase : usersys path: "/app/bots/src/bots/usersys".
+20250228 04:24:11 INFO     updatedatabase : DATABASE_ENGINE: "django.db.backends.postgresql_psycopg2".
+20250228 04:24:11 INFO     updatedatabase : DATABASE_NAME: "botsdb".
+20250228 04:24:11 INFO     updatedatabase : DATABASE_USER: "bots".
+20250228 04:24:11 INFO     updatedatabase : DATABASE_HOST: "postgres".
+20250228 04:24:11 INFO     updatedatabase : DATABASE_PORT: "5432".
+20250228 04:24:11 INFO     updatedatabase : DATABASE_OPTIONS: "{}".
+20250228 04:24:11 INFO     updatedatabase : Connected to database.
+20250228 04:24:11 CRITICAL updatedatabase : !Bots database is locked!
+Bots-engine has ended in an unexpected way during the last run.
+Most likely causes: sudden power-down, system crash, problems with disk I/O, bots-engine terminated by user, etc.
