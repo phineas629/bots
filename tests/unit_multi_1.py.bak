@@ -4,18 +4,21 @@
 
 
 import filecmp
-import os
-import sys
-import logging
-import subprocess
 import glob
-#import bots-modules
-from . import utilsunit
-import bots.botslib as botslib
-import bots.botsinit as botsinit
+import logging
+import os
+import subprocess
+import sys
+
 import bots.botsglobal as botsglobal
+import bots.botsinit as botsinit
+import bots.botslib as botslib
 import bots.transform as transform
 from bots.botsconfig import *
+
+#import bots-modules
+from . import utilsunit
+
 if sys.version_info[0] > 2:
     str = str = str
 

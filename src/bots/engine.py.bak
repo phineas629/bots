@@ -4,25 +4,24 @@
 
 
 import sys
+
 if sys.version_info[0] > 2:
     str = str = str
 
 import atexit
-import click
-import os
 import logging
+import os
 import socket
 import time
 import warnings
 
+import click
 from django.utils.translation import ugettext as _
 
 #bots-modules
-from . import botslib
-from . import botsinit
-from . import botsglobal
-from . import router
+from . import botsglobal, botsinit, botslib
 from . import cleanup as cleanup_
+from . import router
 
 
 @click.command()

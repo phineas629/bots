@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
 import os
+import sys
 import unittest
+
 import pytest
-import bots.botslib as botslib
-import bots.botsinit as botsinit
+
 import bots.botsglobal as botsglobal
+import bots.botsinit as botsinit
+import bots.botslib as botslib
 from bots.botsconfig import *
 
 '''

@@ -67,4 +67,4 @@ The authentication auditing system enhances security by:
 
 ## Maintenance
 
-Regularly review the authentication logs for suspicious activity. Consider implementing log rotation to manage the size of the log file over time. 
+Regularly review the authentication logs for suspicious activity. Consider implementing log rotation to manage the size of the log file over time.

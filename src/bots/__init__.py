@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '3.3.1.dev0'  # Update this version number as needed
+__version__ = "3.3.1.dev0"  # Update this version number as needed
 
 # Don't import modules at the package level that have Django dependencies
 # This allows the package to be imported even if Django is not yet configured
