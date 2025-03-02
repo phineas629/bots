@@ -631,6 +631,7 @@ def runscriptyield(module, modulefile, functioninscript, **argv):
         for result in functiontorun(**argv):
             yield result
     except:
+        txt = txtexc()
         _exception = ScriptError(_('Script file "%(modulefile)s": "%(txt)s".'), {'modulefile': modulefile, 'txt': txt})
         _exception.__cause__ = None
         raise _exception
