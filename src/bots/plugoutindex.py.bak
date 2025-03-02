@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
-import click
 import os
 
-from . import botsinit
-from . import botsglobal
+import click
+
+from . import botsglobal, botsinit
 
 
 @click.command()

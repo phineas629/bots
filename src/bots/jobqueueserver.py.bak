@@ -4,28 +4,31 @@
 
 
 from future import standard_library
+
 standard_library.install_aliases()
 
-import click
-import os
-import time
 import datetime
-import subprocess
+import os
 import queue
+import subprocess
 import sys
 import threading
-
+import time
 from builtins import *  # noqa
+
+import click
+
+from bots import botsglobal, botsinit, botslib
+
 # from builtins import (
 #     bytes, dict, int, list, object, range, str, ascii, chr, hex,
 #     input, next, oct, open, pow, round, super, filter, map, zip)
 
-from bots import botsinit
-from bots import botslib
-from bots import botsglobal
 
 try:
-    from xmlrpc.server import SimpleXMLRPCServer  # fails to import on python2  even future is available
+    from xmlrpc.server import (
+        SimpleXMLRPCServer,  # fails to import on python2  even future is available
+    )
 except ImportError:
     from xmlrpc.server import SimpleXMLRPCServer
 

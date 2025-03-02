@@ -4,17 +4,19 @@
 
 
 import sys
+
 if sys.version_info[0] > 2:
     str = str = str
-import os
 import atexit
 import logging
+import os
 import warnings
+
 from django.utils.translation import ugettext as _
+
 #bots-modules
-from . import botslib
-from . import botsglobal
-from . import botsinit
+from . import botsglobal, botsinit, botslib
+
 ''' Start bots-engine2: do not use database for logging and configuration. (so: no GUI).
     Parameters are hard-coded for now (inpath, infilename, outpath, outfilename, editype, messagetype)
     Translation information (as from translation table: mapping script, outgoing editype etc) is eithr hard-coded now, or via translate table.
@@ -123,18 +125,16 @@ def start():
             sys.exit(0)  # OK
 
 
+import datetime
 import glob
 import shutil
-import datetime
+
 try:
     from xml.etree import cElementTree as ET
 except ImportError:
     from xml.etree import ElementTree as ET
 #bots-modules
-from . import inmessage
-from . import outmessage
-from . import transform
-from . import envelope
+from . import envelope, inmessage, outmessage, transform
 from .botsconfig import *
 
 data_storage = 'botssys/data2'

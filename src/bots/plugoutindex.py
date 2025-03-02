@@ -2,17 +2,15 @@
 # -*- coding: utf-8 -*-
 
 
-
-
-import click
 import os
 
-from . import botsinit
-from . import botsglobal
+import click
+
+from . import botsglobal, botsinit
 
 
 @click.command()
-@click.option('--configdir', '-c', default='config', help='path to config-directory.')
+@click.option("--configdir", "-c", default="config", help="path to config-directory.")
 def start(configdir):
     """A utility to generate the index file of a plugin;
     this can be seen as a database dump of the configuration.
@@ -21,17 +19,17 @@ def start(configdir):
     botsinit.generalinit(configdir)
     from . import pluglib  # import here, import at start of file gives error; first initialize.
 
-    usersys = botsglobal.ini.get('directories', 'usersysabs')
-    index_filename = os.path.join(usersys, 'index.py')
+    usersys = botsglobal.ini.get("directories", "usersysabs")
+    index_filename = os.path.join(usersys, "index.py")
 
     dummy_for_cleaned_data = {
-        'databaseconfiguration': True,
-        'umlists': botsglobal.ini.getboolean('settings', 'codelists_in_plugin', True),
-        'databasetransactions': False,
-        }
+        "databaseconfiguration": True,
+        "umlists": botsglobal.ini.getboolean("settings", "codelists_in_plugin", True),
+        "databasetransactions": False,
+    }
 
     pluglib.make_index(dummy_for_cleaned_data, index_filename)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     start()

@@ -4,10 +4,11 @@
 
 
 
-import click
 import os
 import socket
 import sys
+
+import click
 
 try:  # python3
     import xmlrpc.client as xmlrpclib
@@ -15,8 +16,7 @@ except ImportError:  # python2
     import xmlrpc.client
 
 # Bots-modules
-from . import botsinit
-from . import botsglobal
+from . import botsglobal, botsinit
 
 if sys.version_info[0] > 2:
     str = str = str
