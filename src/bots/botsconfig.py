@@ -1,10 +1,21 @@
 # -*- coding: utf-8 -*-
 
+# Add future imports for Python 2/3 compatibility
+from __future__ import print_function, division, absolute_import
+
+# Import six for Python 2/3 compatibility
+try:
+    import six
+except ImportError:
+    # Handle case where six is not installed
+    pass
+
 # constants/definitions for Bots
 # to be used as:
 # from botsconfig import *
 
 # ***for statust in ta:
+STATUST = 'statust'  # Constant for statust field in the database
 OPEN = 0  # Bots always closes transaction. OPEN is severe error
 ERROR = 1  # error in transaction.
 OK = 2  # successfull, result is 'save'. Should be picked up in same run. If automatic evaluation finds this: is 'stuck'.
@@ -15,6 +26,11 @@ NO_RETRY = 5  # file has been resend.
 # ***for status in ta:
 PROCESS = 1
 DISCARD = 3
+
+# Extra constants needed for Python 3 compatibility
+CHANNELID = 'idchannel'
+MESSAGETYPE = 'idroute'
+TYPEOUT = 'editype'
 
 EXTERNIN = 200  # file is imported into bots
 FILEIN = 220  # received edifile

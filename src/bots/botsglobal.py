@@ -1,10 +1,24 @@
 # -*- coding: utf-8 -*-
 
+# Add future imports for Python 2/3 compatibility
+from __future__ import print_function, division, absolute_import
+
+# Import six for Python 2/3 compatibility
+try:
+    import six
+except ImportError:
+    # Handle case where six is not installed
+    pass
 
 try:
     import importlib.metadata as importlib_metadata
 except ImportError:
     import importlib_metadata
+
+# Custom exceptions for Bots
+class BotsImportError(ImportError):
+    """Exception raised for errors in the Bots import process."""
+    pass
 
 # Globals used by Bots
 try:

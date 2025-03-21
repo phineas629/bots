@@ -1,10 +1,21 @@
 # -*- coding: utf-8 -*-
 
+# Add future imports for Python 2/3 compatibility
+from __future__ import print_function, division, absolute_import
 
 import json as simplejson
 import sys
 import time
 
+# Import six for Python 2/3 compatibility
+try:
+    import six
+    from six.moves import range
+except ImportError:
+    # Handle case where six is not installed
+    pass
+
+# Python 2/3 string type compatibility
 if sys.version_info[0] > 2:
     str = str = str
 try:

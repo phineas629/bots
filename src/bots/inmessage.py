@@ -1,8 +1,19 @@
 # -*- coding: utf-8 -*-
 
+# Add future imports for Python 2/3 compatibility
+from __future__ import print_function, division, absolute_import
 
 import sys
 
+# Import six for Python 2/3 compatibility
+try:
+    import six
+    from six.moves import range
+except ImportError:
+    # Handle case where six is not installed
+    pass
+
+# Python 2/3 string type compatibility
 if sys.version_info[0] > 2:
     str = str = str
     long = int
@@ -50,7 +61,14 @@ def parse_edi_file(**ta_info):
         content = botslib.get_relevant_text_for_UnicodeError(msg)
         # msg.encoding should contain encoding, but does not (think this is not OK for UNOA, etc)
         ediobject.errorlist.append(
-            str(
+            six.text_type(
+                botslib.InMessageError(
+                    _(
+                        '[A59]: incoming file has not allowed characters at/after file-position %(pos)s: "%(content)s".'
+                    ),
+                    {"pos": msg.start, "content": content},
+                )
+            ) if 'six' in globals() else str(
                 botslib.InMessageError(
                     _(
                         '[A59]: incoming file has not allowed characters at/after file-position %(pos)s: "%(content)s".'
