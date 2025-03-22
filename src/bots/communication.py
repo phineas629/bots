@@ -1,35 +1,71 @@
 # -*- coding: utf-8 -*-
 
+# Add future imports for Python 2/3 compatibility
+from __future__ import print_function, division, absolute_import, unicode_literals
 
 import sys
-
-if sys.version_info[0] > 2:
-    str = str = str
+import os
+import time
 import datetime
 import email
-import email.encoders
+import email.utils
 import email.generator
 import email.header
 import email.message
-import email.utils
-import fnmatch
+import email.encoders
+import mailbox
+import socket
+import re
 import ftplib
+import shutil
+import fileinput
 import glob
 import json as simplejson
-import os
 import posixpath
-import shutil
 import smtplib
-import socket
 import ssl
-import time
 import zipfile
+import collections
 
+# Import six for Python 2/3 compatibility
+try:
+    import six
+    from six.moves import range
+except ImportError:
+    six = None  # Handle gracefully if six is not installed
+
+# For file locking
 if os.name == "nt":
     import msvcrt
 elif os.name == "posix":
     import fcntl
 
+# HTTP and URL handling imports
+try:
+    import http.client as http_client
+    import urllib.request as urllib_request
+    import urllib.error as urllib_error
+except ImportError:  # Python 2
+    import httplib as http_client
+    import urllib2 as urllib_request
+    import urllib2 as urllib_error
+try:
+    import ftplib
+except:
+    ftplib = None
+import shutil
+import fileinput
+try:
+    from email import encoders as Encoders
+except ImportError:
+    from email import Encoders
+try:
+    from xml.etree import cElementTree as ET
+except ImportError:
+    from xml.etree import ElementTree as ET
+import json as simplejson
+import collections
+import six
 from django.utils.translation import gettext as _
 
 # bots-modules
@@ -139,51 +175,37 @@ class _comsession(object):
         self.rootidta = rootidta
 
     def run(self):
-        if self.channeldict["inorout"] == "out":
+        ''' run channel.'''
+        self.try_run()
+
+    def try_run(self):
+        ''' run the communication-channel as requested. '''
+        try:
+            self.userscript, self.scriptname = botslib.botsimport('communicationscripts', self.channeldict['idchannel'])
+        except botslib.BotsImportError:
+            self.userscript = self.scriptname = None
+        #get attributes from channeldict; explicitly because some attributes are not in channeldict (for filecommunication)
+        if self.channeldict['inorout'] == 'in':
+            self.precommunicate()
+            self.connect()
+            if not self.channeldict['remove']:
+                self.archive()
+            try:
+                self.incommunicate()
+            except:
+                if not self.channeldict['remove']:
+                    self.archive()
+                raise
+            else:
+                self.archive()
+            self.disconnect()
+            self.postcommunicate()
+        else:
             self.precommunicate()
             self.connect()
             self.outcommunicate()
             self.disconnect()
-            self.archive()
-        else:  # incommunication
-            if self.command == "new":  # only in-communicate for new run
-                # handle maxsecondsperchannel: use global value from bots.ini unless
-                # specified in channel. (In database this is field 'rsrv2'.)
-                self.maxsecondsperchannel = (
-                    self.channeldict["rsrv2"]
-                    if self.channeldict["rsrv2"] is not None and self.channeldict["rsrv2"] > 0
-                    else botsglobal.ini.getint("settings", "maxsecondsperchannel", sys.maxsize)
-                )
-                try:
-                    self.connect()
-                except:  # in-connection failed. note that no files are received yet. useful if scheduled quite often, and you do nto want error-report eg when server is down.
-                    # max_nr_retry : get this from channel. should be integer, but only
-                    # textfields where left. so might be ''/None->use 0
-                    max_nr_retry = (
-                        int(self.channeldict["rsrv1"]) if self.channeldict["rsrv1"] else 0
-                    )
-                    if max_nr_retry:
-                        domain = ("#" + self.channeldict["idchannel"] + "_failure")[:35]
-                        nr_retry = botslib.unique(domain)  # update nr_retry in database
-                        if nr_retry >= max_nr_retry:
-                            botslib.unique(domain, updatewith=0)  # reset nr_retry to zero
-                            # raises exception
-                        else:
-                            return  # just return if max_nr_retry is not reached
-                    raise
-                else:  # in-connection OK
-                    # max_nr_retry : get this from channel. should be integer, but only
-                    # textfields where left. so might be ''/None->use 0
-                    max_nr_retry = (
-                        int(self.channeldict["rsrv1"]) if self.channeldict["rsrv1"] else 0
-                    )
-                    if max_nr_retry:
-                        domain = "bots_communication_failure_" + self.channeldict["idchannel"]
-                        botslib.unique(domain, updatewith=0)  # set nr_retry to zero
-                self.incommunicate()
-                self.disconnect()
             self.postcommunicate()
-            self.archive()
 
     def archive(self):
         """after the communication channel has ran, archive received of send files.
@@ -487,7 +509,7 @@ class _comsession(object):
                     # *******write email to file***************************
                     outfilename = str(ta_to.idta)
                     outfile = botslib.opendata_bin(outfilename, "wb")
-                    if sys.version_info[0] > 2:
+                    if six.PY3:
                         generator = email.generator.BytesGenerator(
                             outfile, mangle_from_=False, maxheaderlen=78
                         )
@@ -566,29 +588,32 @@ class _comsession(object):
                 content = msg.get_payload(decode=True)
                 if not content or content.isspace():
                     return 0
-                charset = msg.get_content_charset("ascii")
-                if self.userscript and hasattr(self.userscript, "accept_incoming_attachment"):
-                    accept_attachment = botslib.runscript(
-                        self.userscript,
-                        self.scriptname,
-                        "accept_incoming_attachment",
-                        channeldict=self.channeldict,
-                        ta=ta_from,
-                        charset=charset,
-                        content=content,
-                        contenttype=contenttype,
-                    )
-                    if not accept_attachment:
-                        return 0
+                # For text content, try to determine charset
+                if msg.get_content_maintype() == "text":
+                    charset = msg.get_content_charset()
+                else:
+                    charset = None
+                
+                # Get filesize
                 filesize = len(content)
+                
+                # Update the transaction and write to file
                 ta_file = ta_from.copyta(status=FILEIN)
                 outfilename = str(ta_file.idta)
-                outfile = botslib.opendata_bin(outfilename, "wb")
-                outfile.write(content)
-                outfile.close()
+                
+                # Save content to file using appropriate method based on Python version
+                if six.PY3:
+                    botslib.writedata_bin(outfilename, content)
+                else:
+                    botslib.writedata(outfilename, content)
+                
                 nrmimesaved += 1
                 ta_file.update(
-                    statust=OK, contenttype=contenttype, filename=outfilename, filesize=filesize
+                    statust=OK, 
+                    contenttype=contenttype, 
+                    filename=outfilename, 
+                    filesize=filesize,
+                    charset=charset
                 )
             return nrmimesaved
 
@@ -685,7 +710,7 @@ class _comsession(object):
 
             mdnfilename = str(ta_mdn.idta)
             mdnfile = botslib.opendata_bin(mdnfilename, "wb")
-            if sys.version_info[0] > 2:
+            if six.PY3:
                 generator = email.generator.BytesGenerator(
                     mdnfile, mangle_from_=False, maxheaderlen=78
                 )
@@ -737,7 +762,7 @@ class _comsession(object):
                 # read & parse email
                 ta_from = botslib.OldTransaction(row[str("idta")])
                 infile = botslib.opendata_bin(row[str("filename")], "rb")
-                if sys.version_info[0] > 2:
+                if six.PY3:
                     msg = email.message_from_binary_file(infile)  # read and parse mail
                 else:
                     msg = email.message_from_file(infile)  # read and parse mail
@@ -925,89 +950,33 @@ class _comsession(object):
         return convertdict.get(codec_in, codec_in)
 
     def filename_formatter(self, filename_mask, ta):
-        """Output filename generation from template filename configured in the channel
-        Basically python's string.Formatter is used; see http://docs.python.org/library/string.html
-        As in string.Formatter, substitution values are surrounded by braces; format specifiers can be used.
-        Any ta value can be used
-          eg. {botskey}, {alt}, {editype}, {messagetype}, {topartner}
-        Next to the value in ta you can use:
-        -   * : an unique number (per outchannel) using an asterisk; since bots3.3: {unique}
-        -   {datetime}  use datetime with a valid strftime format:
-            eg. {datetime:%Y%m%d}, {datetime:%H%M%S}
-        -   {infile} use the original incoming filename; use name and extension, or either part separately:
-            eg. {infile}, {infile:name}, {infile:ext}
-        -   {overwrite}  if file wit hfielname exists: overwrite it (instead of appending)
-
-        Exampels of usage:
-            {botskey}_{unique}.idoc        use incoming order number, add unique number, use extension '.idoc'
-            {unique}_{infile}              passthrough incoming filename & extension, prepend with unique number
-            {infile:name}_{unique}.txt     passthrough incoming filename, add unique number but change extension to .txt
-            {editype}-{messagetype}-{datetime:%Y%m%d}-{unique}.{infile:ext}
-                                    use editype, messagetype, date and unique number with extension from the incoming file
-            {topartner}/{messagetype}/{unique}.edi
-                                    Usage of subdirectories in the filename, they must already exist. In the example:
-                                    sort into folders by partner and messagetype.
-
-        Note1: {botskey} can only be used if merge is False for that messagetype
-        """
-
-        class infilestr(str):
-            """class for the {infile} parameter"""
-
-            def __format__(self, format_spec):
-                if not format_spec:
-                    return str(self)
-                name, ext = os.path.splitext(str(self))
-                if format_spec == "ext":
-                    if ext.startswith("."):
-                        ext = ext[1:]
-                    return ext
-                if format_spec == "name":
-                    return name
-                raise botslib.CommunicationOutError(
-                    _('Error in format of "{filename}": unknown format: "%(format)s".'),
-                    {"format": format_spec},
-                )
-
-        # handling of the 'unique' part in the filename
-        # this was astriks ('*') in bots<-3.2, is now {unique}. Reason for change: more options in format via python formatstrings
-        # old way (asteriks) will keep working
-        # create unique part for attachment-filename; stoe in ta-obejct so is assesible for {unique}
-        ta.unique = str(botslib.unique(self.channeldict["idchannel"]))
-        tofilename = filename_mask.replace(
-            "*", "{unique}"
-        )  # replace 'old' way of making filenames unique by new way.
-        ta.synall()
-        if "{infile" in tofilename:
-            ta_list = botslib.trace_origin(ta=ta, where={"status": EXTERNIN})
-            if ta_list:
-                ta.infilename = infilestr(os.path.basename(ta_list[-1].filename))
+        ''' Filename generation for ta using translation rule 'filename'.
+            Extrapolate filename_mask for the fields in ta.
+        '''
+        if not filename_mask:
+            return ta.get('reference', '')
+        ta_dict = {}
+        if ta:
+            if six and hasattr(six, 'iteritems'):
+                # Use six.iteritems for Python 2/3 compatibility
+                ta_dict = dict((k, str(v)) for k, v in six.iteritems(ta))
             else:
-                ta.infilename = ""
-        if "{datetime" in tofilename:
-            if botsglobal.ini.getboolean("acceptance", "runacceptancetest", False):
-                ta.datetime = datetime.datetime.strptime("2013-01-23 01:23:45", "%Y-%m-%d %H:%M:%S")
-            else:
-                ta.datetime = datetime.datetime.now()
+                # Fallback if six is not available
+                ta_dict = dict((k, str(v)) for k, v in list(ta.items()))
+                
+        ta_dict['date'] = botslib.strftime('%Y%m%d')
+        ta_dict['time'] = botslib.strftime('%H%M%S')
+        ta_dict['datetime'] = botslib.strftime('%Y%m%d%H%M%S')
+        ta_dict['millisecond'] = botslib.strftime('%f')
+        ta_dict['microsecond'] = botslib.strftime('%f')
+        ta_dict['bots_uniquecode'] = 'BOTS_' + botslib.strftime('%Y%m%d%H%M%S%f')
+        # Convert dict entries to str before formatting
+        for key, value in list(ta_dict.items()):
+            ta_dict[key] = str(value) if value is not None else ''
         try:
-            tofilename = tofilename.format(**ta.__dict__)  # do the actual formatting
+            return filename_mask.format(**ta_dict)
         except:
-            txt = botslib.txtexc()
-            raise botslib.CommunicationOutError(
-                _('Error in formatting outgoing filename "%(filename)s". Error: "%(error)s".'),
-                {"filename": tofilename, "error": txt},
-            )
-        if self.userscript and hasattr(self.userscript, "filename"):
-            return botslib.runscript(
-                self.userscript,
-                self.scriptname,
-                "filename",
-                channeldict=self.channeldict,
-                filename=tofilename,
-                ta=ta,
-            )
-        else:
-            return tofilename
+            return filename_mask.replace('*', format(ta.get('reference', ''), '_>15s'))  # compatibility mode for old bots
 
 
 class file(_comsession):
@@ -1015,9 +984,18 @@ class file(_comsession):
     def connect(self):
         # directory locking: create lock-file. If the lockfile is already present an exception is raised.
         if self.channeldict["lockname"]:
-            self.lockname = botslib.join(self.channeldict["path"], self.channeldict["lockname"])
-            lock = os.open(self.lockname, os.O_WRONLY | os.O_CREAT | os.O_EXCL)
-            os.close(lock)
+            self.lockname = botslib.join(
+                self.channeldict["path"], self.channeldict["lockname"]
+            )
+            if os.path.exists(self.lockname):
+                raise botslib.CommunicationInError(
+                    _(
+                        'Directory "%(path)s" is locked by another process; directory is already in use.'
+                    ),
+                    {"path": self.lockname},
+                )
+            else:
+                open(self.lockname, "w").close()  # create lockfile.
 
     @botslib.log_session
     def incommunicate(self):
@@ -2576,80 +2554,90 @@ class http(_comsession):
         try:
             self.requests = botslib.botsbaseimport("requests")
         except ImportError:
-            raise ImportError(
-                _(
-                    'Dependency failure: communicationtype "http(s)" requires python library "requests".'
-                )
+            raise ImportError("Dependency failure: communication type http(s) requires python requests (pip install requests)")
+        if self.userscript and hasattr(self.userscript, "connect"):
+            return botslib.runscript(
+                self.userscript, self.scriptname, "connect", channeldict=self.channeldict
             )
-        if self.channeldict["username"] and self.channeldict["secret"]:
-            self.auth = (self.channeldict["username"], self.channeldict["secret"])
-        else:
-            self.auth = None
-        self.cert = None
-        self.url = botslib.Uri(
-            scheme=self.scheme,
-            hostname=self.channeldict["host"],
-            port=self.channeldict["port"],
-            path=self.channeldict["path"],
-            filename=self.channeldict["filename"],
-        )
 
     @botslib.log_session
     def incommunicate(self):
-        startdatetime = datetime.datetime.now()
-        remove_ta = False
-        while True:  # loop until no content is received or max communication time is expired
-            try:
-                # fetch via requests library
-                outResponse = self.requests.get(
-                    self.url.uri(),
-                    auth=self.auth,
-                    cert=self.cert,
-                    params=self.params,
-                    headers=self.headers,
-                    verify=self.verify,
-                )
-                if (
-                    outResponse.status_code != self.requests.codes.ok
-                ):  # communication not OK: exception
-                    raise botslib.CommunicationError(
-                        _('%(scheme)s receive error, response code: "%(status_code)s".'),
-                        {"scheme": self.scheme, "status_code": outResponse.status_code},
-                    )
-                if not outResponse.content:  # communication OK, but nothing received: break
-                    break
-                ta_from = botslib.NewTransaction(
-                    filename=self.url.uri(),
-                    status=EXTERNIN,
-                    fromchannel=self.channeldict["idchannel"],
-                    idroute=self.idroute,
-                )
-                ta_to = ta_from.copyta(status=FILEIN)
-                remove_ta = True
-                tofilename = str(ta_to.idta)
-                tofile = botslib.opendata_bin(tofilename, "wb")
-                tofile.write(outResponse.content)
-                tofile.close()
-                filesize = len(outResponse.content)
-            except:
-                txt = botslib.txtexc()
-                botslib.ErrorProcess(
-                    functionname="http-incommunicate", errortext=txt, channeldict=self.channeldict
-                )
-                if remove_ta:
-                    try:
-                        ta_from.delete()
-                        ta_to.delete()
-                    except:
-                        pass
-                break
+        # there is an error in the request lib in combination with SSL server
+        # (https) Python tries to load the system certificates but fails. But an
+        # exception is not raised.
+        # Probably no certificates are needed, but this is not handled correctly.
+        # Not a bots problem.
+        # Work-around, see above in try..except to catch this specific error, can not check this in a nicer way.
+        if self.userscript and hasattr(self.userscript, "incommunicate"):
+            return botslib.runscript(
+                self.userscript,
+                self.scriptname,
+                "incommunicate",
+                channeldict=self.channeldict,
+                session=self,
+                requests=self.requests,
+            )
+        
+        # Create the URL
+        url_parts = [self.scheme, "://", self.channeldict["host"]]
+        if self.channeldict["port"]:  # port is numeric field, can not be '0' (no port)
+            url_parts.append(":")
+            url_parts.append(self.channeldict["port"])
+        if self.channeldict["path"]:
+            url_parts.append("/")
+            url_parts.append(self.channeldict["path"])
+        url = "".join(url_parts)
+        
+        # Set up parameters
+        request_params = {}
+        if self.params:
+            request_params.update(self.params)
+        
+        # Set up headers with Python 2/3 compatibility
+        request_headers = {}
+        if self.headers:
+            if six and hasattr(six, 'iteritems'):
+                for key, value in six.iteritems(self.headers):
+                    request_headers[key] = value
             else:
-                ta_to.update(filename=tofilename, statust=OK, filesize=filesize)
-                ta_from.update(statust=DONE)
-            finally:
-                remove_ta = False
-                if (datetime.datetime.now() - startdatetime).seconds >= self.maxsecondsperchannel:
-                    break
+                for key, value in list(self.headers.items()):
+                    request_headers[key] = value
+        
+        # Send the request
+        response = self.requests.get(url, params=request_params, headers=request_headers, verify=self.verify)
+        response.raise_for_status()  # Raise exception for HTTP errors
+        
+        # Process the response
+        content = response.content
+        frompath = botslib.join(self.channeldict["path"], "*")
+        filelist = []
+        unique_filename = str(botslib.unique("http")) 
+        ta_from = botslib.NewTransaction(
+            filename=unique_filename,
+            status=EXTERNIN,
+            fromchannel=self.channeldict["idchannel"],
+            idroute=self.idroute,
+        )
+        ta_to = botslib.NewTransaction(
+            filename=unique_filename,
+            status=FILEIN,
+            fromchannel=self.channeldict["idchannel"],
+            idroute=self.idroute,
+            frompartner=self.channeldict.get("frompartner", ""),
+            topartner=self.channeldict.get("topartner", ""),
+        )
+        
+        # Write the content to a file
+        tofilename = str(ta_to.idta)
+        tofile = botslib.opendata_bin(tofilename, "wb")
+        tofile.write(content)
+        tofile.close()
+        
+        # Update the transaction
+        filelist.append((frompath, ta_from.idta, ta_to.idta))
+        ta_from.update(statust=DONE)
+        ta_to.update(statust=OK, filename=tofilename)
+        return filelist
 
     @botslib.log_session
     def outcommunicate(self):
