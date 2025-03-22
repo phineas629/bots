@@ -1299,10 +1299,14 @@ class excel(csv):
             )
         import csv as csvlib
 
-        try:
-            import io
-        except:
-            import io as StringIO
+        # StringIO handling for Python 2/3 compatibility
+        if sys.version_info[0] >= 3:
+            from io import StringIO
+        else:
+            try:
+                from StringIO import StringIO
+            except ImportError:
+                from io import StringIO
 
         self.messagegrammarread(typeofgrammarfile="grammars")
         self.ta_info["charset"] = self.defmessage.syntax[
@@ -1330,7 +1334,7 @@ class excel(csv):
                 _("Excel extraction failed, may not be an Excel file? Error:\n%(txt)s"),
                 {"txt": txt},
             )
-        rawinputfile = io.StringIO()
+        rawinputfile = StringIO()
         csvout = csvlib.writer(
             rawinputfile,
             quotechar=self.ta_info["quote_char"],
@@ -1362,7 +1366,12 @@ class excel(csv):
         # Read excel first sheet into a 2-d array
         book = self.xlrd.open_workbook(infilename)
         sheet = book.sheet_by_index(0)
-        # ~ formatter  = lambda(t,v): self.format_excelval(book,t,v,False)  # python3
+        
+        # Define formatter function for processing excel values
+        def formatter(args):
+            datatype, value = args
+            return self.format_excelval(book, datatype, value, False)
+            
         xlsdata = []
         for row in range(sheet.nrows):
             (types, values) = (sheet.row_types(row), sheet.row_values(row))
@@ -1402,7 +1411,10 @@ class excel(csv):
 
     def utf8ize(self, l):
         # Make string-like things into utf-8, leave other things alone
-        return [str(s).encode("utf-8") if hasattr(s, "encode") else s for s in l]
+        if sys.version_info[0] >= 3:
+            return [s if not isinstance(s, str) else s for s in l]
+        else:
+            return [str(s).encode("utf-8") if hasattr(s, "encode") else s for s in l]
 
 
 class edifact(var):
@@ -2534,7 +2546,7 @@ class db(Inmessage):
 
     def initfromfile(self):
         botsglobal.logger.debug('Read edi file "%(filename)s".', self.ta_info)
-        self.root = botslib.readdata_pickled(filename=self.ta_info["filename"])
+        self.root = botslib.readdata_pickled(botslib.abspathdata(self.ta_info["filename"]))
 
     def nextmessage(self):
         yield self
@@ -2547,7 +2559,7 @@ class raw(Inmessage):
 
     def initfromfile(self):
         botsglobal.logger.debug('Read edi file "%(filename)s".', self.ta_info)
-        self.root = botslib.readdata_bin(filename=self.ta_info["filename"])
+        self.root = botslib.readdata_bin(botslib.abspathdata(self.ta_info["filename"]))
 
     def nextmessage(self):
         yield self
