@@ -532,14 +532,9 @@ class Inmessage(message.Message):
         return messagetype
 
     def _readcontent_edifile(self):
-        """read content of edi file to memory."""
+        """read content of edi file"""
         botsglobal.logger.debug('Read edi file "%(filename)s".', self.ta_info)
-        with botslib.readdata(
-            filename=self.ta_info["filename"],
-            charset=self.ta_info["charset"],
-            errors=self.ta_info["checkcharsetin"],
-        ) as content:
-            self.rawinput = content
+        self.rawinput = botslib.readdata_bin(botslib.abspathdata(self.ta_info["filename"]))
 
     def _sniff(self):
         """sniffing: hard coded parsing of edi file.
@@ -2514,6 +2509,11 @@ class json(Inmessage):
             return None  # node is empty...
         # ~ thisnode.record['BOTSID']=name
         return thisnode
+
+    def _readcontent_edifile(self):
+        ''' read content of file'''
+        botsglobal.logger.debug('Read edi file "%(filename)s".',self.ta_info)
+        self.rawinput = botslib.readdata(botslib.abspathdata(self.ta_info['filename']))    #read as binary. Inmessage.py limits file size; check for mailbag-file size does not work. A solution would be to let inn.py handle this.
 
 
 class jsonnocheck(json):
