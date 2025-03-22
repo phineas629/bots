@@ -938,6 +938,13 @@ class idoc(fixed):
     SAP does strip all empty fields for record; is catered for in grammar.defaultsyntax
     """
 
+    def _readcontent_edifile(self):
+        """Read content of edi file in memory.
+        For IDOC, read as binary and do not decode - needed for Python 3 compatibility.
+        """
+        botsglobal.logger.debug('Read edi file "%(filename)s".', self.ta_info)
+        self.rawinput = botslib.readdata_bin(botslib.abspathdata(self.ta_info["filename"]))
+
     pass
 
 
