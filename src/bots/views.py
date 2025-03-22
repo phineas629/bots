@@ -1,16 +1,49 @@
 # -*- coding: utf-8 -*-
 
+# Add future imports for Python 2/3 compatibility
+from __future__ import print_function, division, absolute_import
 
 import sys
 
+# Fix the string handling for Python 3
 if sys.version_info[0] > 2:
-    str = str = str
+    pass  # string handling is already compatible
+else:
+    pass  # no need to redefine str
+
 import os
 import shutil
 import socket
 import subprocess
 import time
 import traceback
+
+# For Python 2/3 compatibility
+try:
+    import six
+except ImportError:
+    # Minimal fallback if six isn't available
+    import sys
+    
+    class _Six(object):
+        PY2 = sys.version_info[0] == 2
+        PY3 = sys.version_info[0] == 3
+        
+        def iteritems(self, d):
+            if self.PY2:
+                return d.iteritems()
+            else:
+                return d.items()
+    
+    six = _Six()
+
+# For Python 2 compatibility
+if six.PY2:
+    # Python 2 - using maxint
+    MAXINT = sys.maxint
+else:
+    # Python 3 - using maxsize
+    MAXINT = sys.maxsize
 
 import django
 from django.contrib import messages
@@ -445,7 +478,7 @@ def filer(request, *kw, **kwargs):
     """handles bots file viewer. Only files in data dir of Bots are displayed."""
     if request.method == "GET":
         try:
-            idta = request.GET["idta"]
+            idta = viewlib.safe_int(request.GET["idta"])
             if idta == 0:  # for the 'starred' file names (eg multiple output)
                 raise Exception("to be caught")
 
@@ -519,9 +552,9 @@ def filer(request, *kw, **kwargs):
                 else:
                     ta_object.has_next = True
             return django.shortcuts.render(request, "bots/filer.html", {"idtas": talijst})
-        except:
+        except Exception as e:
             return django.shortcuts.render(
-                request, "bots/filer.html", {"error_content": _("No such file.")}
+                request, "bots/filer.html", {"error_content": _("No such file. Error: %s") % str(e)}
             )
 
 
@@ -534,7 +567,8 @@ def srcfiler(request, *kw, **kwargs):
                 ".py"
             ):  # only python source in usersys!
 
-                with open(src) as f:
+                # For Python 3 compatibility, use encoding parameter
+                with open(src, 'r', encoding='utf-8', errors='replace') as f:
                     source = f.read()
                 classified_text = py2html.analyze_python(source)
                 html_source = py2html.html_highlight(classified_text)
@@ -547,9 +581,9 @@ def srcfiler(request, *kw, **kwargs):
                     "bots/srcfiler.html",
                     {"error_content": _("File %s not allowed." % src)},
                 )
-        except:
+        except Exception as e:
             return django.shortcuts.render(
-                request, "bots/srcfiler.html", {"error_content": _("No such file.")}
+                request, "bots/srcfiler.html", {"error_content": _("No such file. Error: %s" % str(e))}
             )
 
 
@@ -563,14 +597,18 @@ def logfiler(request, *kw, **kwargs):
         logpath = botslib.join(botsglobal.ini.get("directories", "botssys"), "logging")
         logf = botslib.join(logpath, log)
         try:
-            with open(logf) as f:
+            # Use encoding parameter and context manager for Python 3 compatibility
+            with open(logf, 'r', encoding='utf-8', errors='replace') as f:
                 logdata = f.read()
-        except:
-            logdata = _("No such file %s" % logf)
+        except Exception as e:
+            logdata = _("No such file %s. Error: %s" % (logf, str(e)))
 
         if "action" in request.GET and request.GET["action"] == "download":
             response = django.http.HttpResponse(content_type="text/log")
             response["Content-Disposition"] = "attachment; filename=" + log
+            # For Python 3 compatibility, ensure we're writing string data, not bytes
+            if isinstance(logdata, bytes):
+                logdata = logdata.decode('utf-8', errors='replace')
             response.write(logdata)
             return response
         else:
@@ -679,9 +717,10 @@ def plugout(request, *kw, **kwargs):
                     botsglobal.logger.info(
                         _('Plugin "%(file)s" created successful.'), {"file": filename}
                     )
-                    response = django.http.HttpResponse(
-                        open(filename, "rb").read(), content_type="application/zip"
-                    )
+                    # Improved file handling with context manager
+                    with open(filename, "rb") as f:
+                        file_content = f.read()
+                    response = django.http.HttpResponse(file_content, content_type="application/zip")
                     # response['Content-Length'] = os.path.getsize(filename)
                     response["Content-Disposition"] = (
                         "attachment; filename=" + "plugin" + time.strftime("_%Y%m%d") + ".zip"
@@ -743,7 +782,7 @@ def delete(request, *kw, **kwargs):
                         if (
                             not max_report_idta
                         ):  # if report is report of last run, there is no next report
-                            max_report_idta = sys.maxsize
+                            max_report_idta = MAXINT
                         # we have a idta-range now: from (and including) acc_report.idta till (and
                         # excluding) max_report_idta
                         list_file += (
