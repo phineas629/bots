@@ -658,10 +658,8 @@ def opendata(filename, mode, charset, errors="strict"):
 
 def readdata(filename, charset, errors="strict"):
     """read internal data file in memory as unicode."""
-    filehandler = opendata(filename, "r", charset, errors)
-    content = filehandler.read()
-    filehandler.close()
-    return content
+    with opendata(filename, "r", charset, errors) as filehandler:
+        return filehandler.read()
 
 
 def opendata_bin(filename, mode):

@@ -534,11 +534,12 @@ class Inmessage(message.Message):
     def _readcontent_edifile(self):
         """read content of edi file to memory."""
         botsglobal.logger.debug('Read edi file "%(filename)s".', self.ta_info)
-        self.rawinput = botslib.readdata(
+        with botslib.readdata(
             filename=self.ta_info["filename"],
             charset=self.ta_info["charset"],
             errors=self.ta_info["checkcharsetin"],
-        )
+        ) as content:
+            self.rawinput = content
 
     def _sniff(self):
         """sniffing: hard coded parsing of edi file.
@@ -1424,7 +1425,8 @@ class edifact(var):
         is read as binary. In _sniff determine charset; then decode according to charset
         """
         botsglobal.logger.debug('Read edi file "%(filename)s".', self.ta_info)
-        self.rawinput = botslib.readdata_bin(filename=self.ta_info["filename"])  # read as binary
+        with botslib.readdata_bin(filename=self.ta_info["filename"]) as content:  # read as binary
+            self.rawinput = content
 
     def _sniff(self):
         """examine the beginning of edifact file for syntax parameters and charset. if (beginning of) edifact file is not correct: error.
@@ -1543,9 +1545,14 @@ class edifact(var):
             )
             _exception.__cause__ = None
             raise _exception
-        # ~ except UnicodeDecodeError as msg:
-        # ~ raise botslib.InMessageError(_('[A59]: Edifact file has not allowed characters at/after file-position %(content)s.'),
-        # ~ {'content':msg[2]})
+        except UnicodeDecodeError as msg:
+            content = botslib.get_relevant_text_for_UnicodeError(msg)
+            _exception = botslib.InMessageError(
+                _('[A59]: Edifact file has not allowed characters at/after file-position %(pos)s: "%(content)s".'),
+                {"pos": msg.start, "content": content},
+            )
+            _exception.__cause__ = None
+            raise _exception
         # repetition separator only for version >= 4.
         if self.ta_info["version"] < "4" or self.ta_info["reserve"] == " ":
             # if version > 4 and repetition separator is
