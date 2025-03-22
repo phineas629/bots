@@ -1346,7 +1346,12 @@ class excel(csv):
         rawinputfile.seek(0)
         self.rawinput = rawinputfile.read()
         rawinputfile.close()
-        self.rawinput = self.rawinput.decode("utf-8")
+        if sys.version_info[0] >= 3:
+            # In Python 3, we already have a string at this point
+            self.rawinput = self.rawinput
+        else:
+            # In Python 2, decode from utf-8 to unicode
+            self.rawinput = self.rawinput.decode("utf-8")
         # start lexing and parsing as csv
         self._lex()
         if hasattr(self, "rawinput"):
@@ -1412,8 +1417,10 @@ class excel(csv):
     def utf8ize(self, l):
         # Make string-like things into utf-8, leave other things alone
         if sys.version_info[0] >= 3:
+            # In Python 3, just return the string as is
             return [s if not isinstance(s, str) else s for s in l]
         else:
+            # In Python 2, encode string to utf-8
             return [str(s).encode("utf-8") if hasattr(s, "encode") else s for s in l]
 
 
