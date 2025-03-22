@@ -43,28 +43,80 @@ class JsonFormatter(logging.Formatter):
 
 # Set up loggers
 def setup_auth_audit_logger():
-    """Set up a logger for authentication audit events."""
-    logger = logging.getLogger("auth_audit")
+    """
+    setup logging for authentication/authorization
+    
+    Set up a rotating log handler for authentication/authorization related
+    logging, return the ready-to-use logger object.
+    """
+    # imports are within the function so as to not mess with Django's logging on startup.
+    import os
+    import sys
+    import tempfile
+    import logging
+    import logging.handlers
+    from django.conf import settings
+
+    # Create a new logging instance/handler separate from the standard bots logging.
+    if hasattr(settings, 'LOGGING_DIRECTORY'):
+        log_dir = settings.LOGGING_DIRECTORY
+    elif hasattr(settings, 'BOTS_LOG_DIR'):
+        log_dir = settings.BOTS_LOG_DIR
+    elif 'BOTS_LOG_DIR' in os.environ:
+        log_dir = os.environ['BOTS_LOG_DIR']
+    elif os.name == 'nt':
+        log_dir = os.path.join(os.path.normpath(
+            os.environ['APPDATA']), 'bots', 'logging')
+    elif os.name == 'posix':
+        try:
+            # Get temp dir in case default log locations aren't writable
+            temp_dir = tempfile.gettempdir()
+            bot_temp_log_dir = os.path.join(temp_dir, 'bots_logs')
+            
+            # First try /var/log/bots
+            log_dir = '/var/log/bots'
+            if not os.path.exists(log_dir):
+                try:
+                    os.makedirs(log_dir)
+                except (OSError, IOError):
+                    # Use temp dir if /var/log/bots can't be created
+                    log_dir = bot_temp_log_dir
+            
+            # Test if directory is writable
+            if not os.access(log_dir, os.W_OK):
+                log_dir = bot_temp_log_dir
+                
+            # Create temp log dir if necessary
+            if log_dir == bot_temp_log_dir and not os.path.exists(log_dir):
+                os.makedirs(log_dir)
+                
+        except (OSError, IOError):
+            # If all else fails, use current directory
+            log_dir = os.getcwd()
+    else:
+        log_dir = os.path.abspath(os.path.dirname(sys.modules[__name__].__file__))
+
+    log_file = os.path.join(log_dir, 'auth.log')
+
+    logger = logging.getLogger('auth')
     logger.setLevel(logging.INFO)
+    # If already handlers for logger, do nothing
+    # (this prevents multiple handlers for same logger)
+    if logger.handlers:
+        return logger
 
-    # Create logs directory if it doesn't exist
-    log_dir = "/app/logs"
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-
-    # File handler for audit logs
-    file_handler = logging.FileHandler(os.path.join(log_dir, "auth_audit.log"))
-    file_handler.setFormatter(JsonFormatter())
-
-    # Console handler for debugging
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(
-        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    logging_file_handler = logging.handlers.RotatingFileHandler(
+        log_file,
+        maxBytes=1024*1024,
+        backupCount=10,
     )
 
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
-
+    formatter = logging.Formatter(
+        "%(asctime)s %(levelname)-8s %(name)s : %(message)s",
+        '%Y%m%d %H:%M:%S',
+    )
+    logging_file_handler.setFormatter(formatter)
+    logger.addHandler(logging_file_handler)
     return logger
 
 
