@@ -1,26 +1,53 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function, division, absolute_import
 
 import sys
-
-if sys.version_info[0] > 2:
-    str = str = str
-    from urllib.parse import quote as urllib_quote
-else:
-    from urllib.parse import quote as urllib_quote
-
 import os
 import re
 
-from django.core.exceptions import ValidationError
+# For Python 2/3 compatibility
+try:
+    import six
+except ImportError:
+    # Minimal fallback if six isn't available
+    import sys
+    
+    class _Six(object):
+        PY2 = sys.version_info[0] == 2
+        PY3 = sys.version_info[0] == 3
+        
+        def iteritems(self, d):
+            if self.PY2:
+                return d.iteritems()
+            else:
+                return d.items()
+    
+    six = _Six()
 
-# ~ from django.core.validators import validate_email
+# Fix string handling compatibility
+if six.PY2:
+    # Python 2 - no changes needed, unicode/str types exist
+    pass
+else:
+    # Python 3 - str is already Unicode
+    pass
+
+from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
 from django.db import models
-from django.utils.translation import gettext_lazy as _  # django 1.7: have to use ugettext_lazy here
+from django.utils.translation import gettext_lazy as _
 from six import python_2_unicode_compatible
 
 from . import botsglobal, validate_email
+
+# Fix URL handling compatibility
+try:
+    # Python 3
+    from urllib.parse import quote as urllib_quote
+except ImportError:
+    # Python 2
+    from urllib import quote as urllib_quote
 
 """ Declare database tabels.
     Django is not always perfect in generating db - but improving ;-)).
@@ -227,29 +254,33 @@ def multiple_email_validator(value):
 
 
 def script_link1(script, linktext):
-    """if script exists return a plain text name as link; else return "no" icon, plain text name
-    used in translate (all scripts should exist, missing script is an error).
-    """
-    if os.path.exists(script):
-        return '<a href="/srcfiler/?src=%s" target="_blank">%s</a>' % (
-            urllib_quote(script.encode("utf-8")),
-            linktext,
+    """used in confirmrules to make scripts function in django interface"""
+    if script and os.path.exists(script):
+        from django.template.defaultfilters import force_escape
+
+        return (
+            '<a target="_blank" href="/bots/srcfiler/?src=%s">%s</a>' % (urllib_quote(script), force_escape(linktext))
         )
     else:
-        return '<img src="/media/admin/img/icon-no.gif"></img> %s' % linktext
+        return linktext
 
 
 def script_link2(script):
-    """if script exists return "yes" icon + view link; else return "no" icon
-    used in routes, channels (scripts are optional)
-    """
+    """used in routes to make scripts function in django interface"""
+    if not script:
+        return ""
     if os.path.exists(script):
-        return (
-            '<a class="nowrap" href="/srcfiler/?src=%s" target="_blank"><img src="/media/admin/img/icon-yes.gif"></img> view</a>'
-            % urllib_quote(script.encode("utf-8"))
-        )
+        if os.path.isdir(script):
+            return (
+                '<a target="_blank" href="/bots/srcfiler/?src=%s">%s</a>' % (urllib_quote(script), script)
+            )
+        else:
+            basename = os.path.basename(script)
+            return (
+                '<a target="_blank" href="/bots/srcfiler/?src=%s">%s</a>' % (urllib_quote(script), basename)
+            )
     else:
-        return '<img src="/media/admin/img/icon-no.gif"></img>'
+        return script
 
 
 class MultipleEmailField(models.CharField):
