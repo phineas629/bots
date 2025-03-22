@@ -2512,7 +2512,7 @@ class json(Inmessage):
     def _readcontent_edifile(self):
         ''' read content of file'''
         botsglobal.logger.debug('Read edi file "%(filename)s".',self.ta_info)
-        self.rawinput = botslib.readdata(botslib.abspathdata(self.ta_info['filename']))    #read as binary. Inmessage.py limits file size; check for mailbag-file size does not work. A solution would be to let inn.py handle this.
+        self.rawinput = botslib.readdata(botslib.abspathdata(self.ta_info['filename']), self.ta_info["charset"], self.ta_info["checkcharsetin"])
 
 
 class jsonnocheck(json):
