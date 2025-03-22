@@ -683,8 +683,8 @@ class fixed(Inmessage):
         """open the edi file."""
         botsglobal.logger.debug('Read edi file "%(filename)s".', self.ta_info)
         self.filehandler = botslib.opendata(
-            filename=self.ta_info["filename"],
-            mode="rb",
+            botslib.abspathdata(self.ta_info["filename"]),
+            mode="r",
             charset=self.ta_info["charset"],
             errors=self.ta_info["checkcharsetin"],
         )
@@ -1420,8 +1420,7 @@ class edifact(var):
         is read as binary. In _sniff determine charset; then decode according to charset
         """
         botsglobal.logger.debug('Read edi file "%(filename)s".', self.ta_info)
-        with botslib.readdata_bin(filename=self.ta_info["filename"]) as content:  # read as binary
-            self.rawinput = content
+        self.rawinput = botslib.readdata_bin(botslib.abspathdata(self.ta_info["filename"]))
 
     def _sniff(self):
         """examine the beginning of edifact file for syntax parameters and charset. if (beginning of) edifact file is not correct: error.
