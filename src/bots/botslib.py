@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# Add future imports for Python 2/3 compatibility
+from __future__ import print_function, division, absolute_import
 
 import codecs
 import collections
@@ -14,11 +16,30 @@ import traceback
 
 import django
 
+# Use six for Python 2/3 compatibility
+try:
+    import six
+    from six.moves import range
+except ImportError:
+    # If six is not installed, install it or define minimal compatibility layer
+    class _Six(object):
+        PY2 = sys.version_info[0] == 2
+        PY3 = sys.version_info[0] == 3
+        
+        def iteritems(self, d):
+            if self.PY2:
+                return d.iteritems()
+            else:
+                return d.items()
+    
+    six = _Six()
+
 try:
     import pickle as pickle
 except ImportError:
     import pickle
 
+# Handle string vs bytes distinction between Python 2 and 3
 if sys.version_info[0] > 2:
     str = str = str
 
@@ -186,7 +207,7 @@ class NewTransaction(_Transaction):
 
     def __init__(self, **ta_info):
         updatedict = dict(
-            (key, value) for key, value in list(ta_info.items()) if key in self.filterlist
+            (key, value) for key, value in six.iteritems(ta_info) if key in self.filterlist
         )  # filter ta_info
         updatedict["script"] = self.processlist[-1]
         namesstring = ",".join(key for key in updatedict)
@@ -248,7 +269,7 @@ def addinfo(change, where):
     if "statust" not in change:  # by default: new ta is OK
         change["statust"] = OK
     wherestring = " AND ".join(
-        key + "=%(" + key + ")s " for key in where if key != "rootidta"
+        key + "=%(" + key + ")s " for key in six.iteritems(where) if key != "rootidta"
     )  # wherestring; does not use rootidta
     return addinfocore(change=change, where=where, wherestring=wherestring)
 
@@ -260,7 +281,7 @@ def updateinfocore(change, where, wherestring=""):
     """
     wherestring = " WHERE idta > %(rootidta)s AND " + wherestring
     # change-dict: discard empty values. Change keys: this is needed because same keys can be in where-dict
-    change2 = [(key, value) for key, value in list(change.items()) if value]
+    change2 = [(key, value) for key, value in six.iteritems(change) if value]
     if not change2:
         return
     changestring = ",".join(key + "=%(change_" + key + ")s" for key, value in change2)
@@ -281,7 +302,7 @@ def updateinfo(change, where):
     if "statust" not in change:  # by default: new ta is OK
         change["statust"] = OK
     wherestring = " AND ".join(
-        key + "=%(" + key + ")s " for key in where if key != "rootidta"
+        key + "=%(" + key + ")s " for key in six.iteritems(where) if key != "rootidta"
     )  # wherestring for copy & done
     return updateinfocore(change=change, where=where, wherestring=wherestring)
 
@@ -476,57 +497,21 @@ def txtexc():
         return terug
 
 
-if sys.version_info[0] > 2:  # safe_unicode
-
-    def safe_unicode(value):
-        """For errors: return best possible unicode...should never lead to errors."""
-        # ~ print('safe_unicode0')
+def safe_unicode(value):
+    """For Python 3, this is just the string.
+    For Python 2, convert to unicode if needed.
+    """
+    if not value:  # protect against 0, None, False etc
+        return u""
+    if isinstance(value, six.text_type):
+        return value
+    elif isinstance(value, six.binary_type):
         try:
-            if isinstance(value, str):  # is already unicode, just return
-                return value
-            elif isinstance(value, bytes):  # string/bytecode, encoding unknown.
-                for charset in ["utf_8", "latin_1"]:
-                    try:
-                        return value.decode(charset, "strict")  # decode strict
-                    except:
-                        continue
-                print("safe_unicode3")  # should never get here?
-                return value.decode("utf_8", "ignore")  # decode as if it is utf-8, ignore errors.
-            else:
-                # ~ print('safe_unicode1',type(value))
-                return str(value)
-        except Exception as msg:
-            print(("safe_unicode2", msg))
-            try:
-                return str(repr(value))
-            except:
-                return "Error while displaying error"
-
-else:
-
-    def safe_unicode(value):  # python2
-        """For errors: return best possible unicode...should never lead to errors."""
-        # ~ print('safe_unicode00')
-        try:
-            if isinstance(value, str):  # is already unicode, just return
-                return value
-            elif isinstance(value, str):  # string/bytecode, encoding unknown.
-                for charset in ["utf_8", "latin_1"]:
-                    try:
-                        return value.decode(charset, "strict")  # decode strict
-                    except:
-                        continue
-                print("safe_unicode33")  # should never get here?
-                return value.decode("utf_8", "ignore")  # decode as if it is utf-8, ignore errors.
-            else:
-                # ~ print('safe_unicode11',type(value))
-                return str(value)
-        except Exception as msg:
-            print(("safe_unicode22", msg))
-            try:
-                return str(repr(value))
-            except:
-                return "Error while displaying error"
+            return value.decode(charset, "strict")  # decode strict
+        except UnicodeDecodeError:
+            return value.decode("utf_8", "ignore")  # decode as if it is utf-8, ignore errors.
+    else:
+        return six.text_type(value)
 
 
 class ErrorProcess(NewTransaction):
@@ -659,11 +644,16 @@ def deldata(filename):
 
 
 def opendata(filename, mode, charset, errors="strict"):
-    """open internal data file as unicode."""
-    filename = abspathdata(filename)
+    """Open a text file in the data directory in the right mode with the right encoding.
+    Usage: for writing: open(filename,'w') for appending: open(filename,'a') for reading: open(filename,'r')
+    """
     if "w" in mode:
-        dirshouldbethere(os.path.dirname(filename))
-    return codecs.open(filename, mode, charset, errors)
+        if not os.path.exists(os.path.dirname(filename)):
+            dirshouldbethere(os.path.dirname(filename))
+    try:
+        return codecs.open(filename, mode, charset, errors)
+    except Exception as msg:
+        raise BotsError("Error opening file {}: {}".format(filename, msg))
 
 
 def readdata(filename, charset, errors="strict"):
@@ -675,32 +665,44 @@ def readdata(filename, charset, errors="strict"):
 
 
 def opendata_bin(filename, mode):
-    """open internal data file as binary."""
+    """Open a binary file in the data directory in the right mode.
+    Usage: for writing: open(filename,'wb') for reading: open(filename,'rb')
+    """
     filename = abspathdata(filename)
     if "w" in mode:
-        dirshouldbethere(os.path.dirname(filename))
-    return open(filename, mode)
+        if not os.path.exists(os.path.dirname(filename)):
+            dirshouldbethere(os.path.dirname(filename))
+    try:
+        return open(filename, mode)
+    except Exception as msg:
+        raise BotsError("Error opening binary file {}: {}".format(filename, msg))
 
 
 def readdata_bin(filename):
-    """read internal data file in memory as binary."""
-    filehandler = opendata_bin(filename, mode="rb")
-    content = filehandler.read()
-    filehandler.close()
-    return content
+    """Read internal data file in memory as binary."""
+    try:
+        with opendata_bin(filename, mode="rb") as filehandler:
+            return filehandler.read()
+    except Exception as msg:
+        raise BotsError("Error reading binary file {}: {}".format(filename, msg))
 
 
 def readdata_pickled(filename):
-    filehandler = opendata_bin(filename, mode="rb")  # pickle is a binary/byte stream
-    content = pickle.load(filehandler)
-    filehandler.close()
-    return content
+    """Read a pickled object from file."""
+    try:
+        with opendata_bin(filename, mode="rb") as filehandler:  # pickle is a binary/byte stream
+            return pickle.load(filehandler)
+    except Exception as msg:
+        raise BotsError("Error reading pickled file {}: {}".format(filename, msg))
 
 
 def writedata_pickled(filename, content):
-    filehandler = opendata_bin(filename, mode="wb")  # pickle is a binary/byte stream
-    pickle.dump(content, filehandler)
-    filehandler.close()
+    """Write a pickled object to file."""
+    try:
+        with opendata_bin(filename, mode="wb") as filehandler:  # pickle is a binary/byte stream
+            pickle.dump(content, filehandler)
+    except Exception as msg:
+        raise BotsError("Error writing pickled file {}: {}".format(filename, msg))
 
 
 # **********************************************************/**
@@ -1020,12 +1022,19 @@ def settimeout(milliseconds):
 
 
 def updateunlessset(updatedict, fromdict):
-    # ~ updatedict.update((key,value) for key, value in fromdict.items() if key not in updatedict) #!!TODO when is this valid? Note: prevents setting charset from gramamr
+    """Update dictionary with values from another dictionary,
+    but only for keys that don't exist or have empty values in the target dict.
+    
+    Args:
+        updatedict: The dictionary to update
+        fromdict: The source dictionary with values to copy
+    """
+    # Use dict_items for Python 2/3 compatibility
     updatedict.update(
         (key, value)
-        for key, value in list(fromdict.items())
+        for key, value in dict_items(fromdict)
         if key not in updatedict or not updatedict[key]
-    )  # !!TODO when is this valid? Note: prevents setting charset from gramamr
+    )
 
 
 def rreplace(org, old, new="", count=1):
@@ -1129,8 +1138,12 @@ if sys.version_info[0] > 2:
             else:
                 xxx = kwargs
             self.xxx = collections.defaultdict(str)
-            for key, value in list(xxx.items()):
-                self.xxx[safe_unicode(key)] = safe_unicode(value)
+            if six and hasattr(six, 'iteritems'):
+                for key, value in six.iteritems(xxx):
+                    self.xxx[safe_unicode(key)] = safe_unicode(value)
+            else:
+                for key, value in list(xxx.items()):
+                    self.xxx[safe_unicode(key)] = safe_unicode(value)
 
         def __str__(self):
             try:
@@ -1162,8 +1175,12 @@ else:
             else:
                 xxx = kwargs
             self.xxx = collections.defaultdict(str)
-            for key, value in list(xxx.items()):
-                self.xxx[safe_unicode(key)] = safe_unicode(value)
+            if six and hasattr(six, 'iteritems'):
+                for key, value in six.iteritems(xxx):
+                    self.xxx[safe_unicode(key)] = safe_unicode(value)
+            else:
+                for key, value in list(xxx.items()):
+                    self.xxx[safe_unicode(key)] = safe_unicode(value)
 
         def __unicode__(self):
             try:
@@ -1279,3 +1296,25 @@ class GotoException(
 
 class FileTooLargeError(BotsError):
     pass
+
+
+# Dictionary handling function for Python 2/3 compatibility
+def dict_values(d):
+    """Get dictionary values in a Python 2/3 compatible way."""
+    if hasattr(six, 'itervalues'):
+        return six.itervalues(d)
+    return d.values()
+
+
+def dict_keys(d):
+    """Get dictionary keys in a Python 2/3 compatible way."""
+    if hasattr(six, 'iterkeys'):
+        return six.iterkeys(d)
+    return d.keys()
+
+
+def dict_items(d):
+    """Get dictionary items in a Python 2/3 compatible way."""
+    if hasattr(six, 'iteritems'):
+        return six.iteritems(d)
+    return d.items()

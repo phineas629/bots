@@ -7,13 +7,29 @@ from __future__ import print_function, division, absolute_import
 try:
     import six
 except ImportError:
-    # Handle case where six is not installed
-    pass
+    # Define a minimal compatibility layer
+    import sys
+    
+    class _Six(object):
+        PY2 = sys.version_info[0] == 2
+        PY3 = sys.version_info[0] == 3
+        
+        def iteritems(self, d):
+            if self.PY2:
+                return d.iteritems()
+            else:
+                return d.items()
+    
+    six = _Six()
 
+# Handle importlib.metadata for package version detection
 try:
     import importlib.metadata as importlib_metadata
 except ImportError:
-    import importlib_metadata
+    try:
+        import importlib_metadata
+    except ImportError:
+        importlib_metadata = None
 
 # Custom exceptions for Bots
 class BotsImportError(ImportError):
@@ -22,9 +38,13 @@ class BotsImportError(ImportError):
 
 # Globals used by Bots
 try:
-    version = importlib_metadata.version("bots")  # bots version
-except importlib_metadata.PackageNotFoundError:
+    if importlib_metadata:
+        version = importlib_metadata.version("bots")  # bots version
+    else:
+        version = "unknown"
+except Exception:
     version = "unknown"  # Set a default version if 'bots' package is not found
+
 db = None  # db-object
 ini = None  # ini-file-object that is read (bots.ini)
 logger = None  # logger or bots-engine
