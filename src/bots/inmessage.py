@@ -2319,10 +2319,12 @@ class xml(Inmessage):
                     parser.entity[key] = value
             except AttributeError:
                 pass  # there is no extra_character_entity in the mailbag definitions, is OK.
-            etree = (
-                ET.ElementTree()
-            )  # ElementTree: lexes, parses, makes etree; etree is quite similar to bots-node trees but conversion is needed
-            etreeroot = etree.parse(filename, parser)
+            etree = ET.ElementTree()  # ElementTree: lexes, parses, makes etree; etree is quite similar to bots-node trees but conversion is needed
+            
+            # Use explicit file opening for better Python 2/3 compatibility
+            with open(filename, 'rb') as xml_file:
+                etreeroot = etree.parse(xml_file, parser)
+                
             for item in mailbagsearch:
                 if "xpath" not in item or "messagetype" not in item:
                     raise botslib.InMessageError(_("Invalid search parameters in xml mailbag."))
@@ -2341,10 +2343,11 @@ class xml(Inmessage):
             parser = ET.XMLParser()
             for key, value in list(self.ta_info["extra_character_entity"].items()):
                 parser.entity[key] = value
-            etree = (
-                ET.ElementTree()
-            )  # ElementTree: lexes, parses, makes etree; etree is quite similar to bots-node trees but conversion is needed
-            etreeroot = etree.parse(filename, parser)
+            etree = ET.ElementTree()  # ElementTree: lexes, parses, makes etree; etree is quite similar to bots-node trees but conversion is needed
+            
+            # Use explicit file opening for better Python 2/3 compatibility
+            with open(filename, 'rb') as xml_file:
+                etreeroot = etree.parse(xml_file, parser)
         self._handle_empty(etreeroot)
         self.stackinit()
         self.root = self._etree2botstree(etreeroot)  # convert etree to bots-nodes-tree
