@@ -1925,6 +1925,13 @@ class x12(var):
     def _manipulatemessagetype(messagetype, inode):
         """x12 also needs field from GS record to identify correct messagetype"""
         return messagetype + inode.record.get("GS08", "")
+        
+    def _readcontent_edifile(self):
+        """Read content of edi file in memory.
+        For X12, read as binary and do not decode - needed for Python 3 compatibility.
+        """
+        botsglobal.logger.debug('Read edi file "%(filename)s".', self.ta_info)
+        self.rawinput = botslib.readdata_bin(botslib.abspathdata(self.ta_info["filename"]))
 
     def _sniff(self):
         """examine a file for syntax parameters and correctness of protocol
@@ -2247,6 +2254,13 @@ class x12(var):
 
 
 class tradacoms(var):
+
+    def _readcontent_edifile(self):
+        """Read content of edi file in memory.
+        For TRADACOMS, read as binary and do not decode - needed for Python 3 compatibility.
+        """
+        botsglobal.logger.debug('Read edi file "%(filename)s".', self.ta_info)
+        self.rawinput = botslib.readdata_bin(botslib.abspathdata(self.ta_info["filename"]))
 
     def checkenvelope(self):
         for nodestx in self.getloop({"BOTSID": "STX"}):
