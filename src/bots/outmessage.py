@@ -13,11 +13,24 @@ try:
     from six.moves import range
 except ImportError:
     # Handle case where six is not installed
-    pass
+    if sys.version_info[0] > 2:
+        # For Python 3, range is already what we want
+        pass
+    else:
+        # For Python 2, range is xrange
+        range = xrange
 
 # Python 2/3 string type compatibility
-if sys.version_info[0] > 2:
-    str = str = str
+PY3 = sys.version_info[0] > 2
+if PY3:
+    string_types = str,
+    text_type = str
+    binary_type = bytes
+else:
+    string_types = basestring,
+    text_type = unicode
+    binary_type = str
+
 try:
     import cdecimal as decimal
 except ImportError:
@@ -135,16 +148,16 @@ class Outmessage(message.Message):
             self._closewrite()
 
     def _initwrite(self):
-        botsglobal.logger.debug('Start writing to file "%(filename)s".', self.ta_info)
-        self._outstream = botslib.opendata(
-            self.ta_info["filename"],
-            "wb",
-            charset=self.ta_info["charset"],
-            errors=self.ta_info["checkcharsetout"],
+        if hasattr(botsglobal, 'logger') and botsglobal.logger:
+            botsglobal.logger.debug('Start writing to file "%(filename)s".', self.ta_info)
+        self._outstream = botslib.opendata_bin(
+            self.ta_info["filename"], 
+            "wb"
         )
 
     def _closewrite(self):
-        botsglobal.logger.debug('End writing to file "%(filename)s".', self.ta_info)
+        if hasattr(botsglobal, 'logger') and botsglobal.logger:
+            botsglobal.logger.debug('End writing to file "%(filename)s".', self.ta_info)
         self._outstream.close()
 
     def _write(self, node_instance):
@@ -155,10 +168,24 @@ class Outmessage(message.Message):
         self.tree2records(node_instance)
         value = self.record2string(self.lex_records)
         wrap_length = int(self.ta_info.get("wrap_length", 0))
+        
+        # Ensure value is properly encoded to bytes before writing
+        if PY3 and isinstance(value, str):
+            value = value.encode(self.ta_info["charset"], self.ta_info["checkcharsetout"])
+            
         if wrap_length:
             try:
                 for i in range(0, len(value), wrap_length):  # split in fixed lengths
-                    self._outstream.write(value[i : i + wrap_length] + "\r\n")
+                    line = value[i : i + wrap_length]
+                    # Ensure newline is properly encoded for Python 3
+                    if PY3 and isinstance(line, str):
+                        line = line.encode(self.ta_info["charset"], self.ta_info["checkcharsetout"])
+                    self._outstream.write(line)
+                    # Ensure newline is properly encoded for Python 3
+                    if PY3:
+                        self._outstream.write(b"\r\n")
+                    else:
+                        self._outstream.write("\r\n")
             except UnicodeError as msg:
                 content = botslib.get_relevant_text_for_UnicodeError(msg)
                 raise botslib.OutMessageError(
@@ -865,59 +892,49 @@ class xml(Outmessage):
         self._closewrite()
 
     def _xmlcorewrite(self, xmltree, root):
-        if sys.version_info[0] == 2 and sys.version_info[1] == 6:
-            python26 = True
-        else:
-            python26 = False
-        if (
-            not python26 and self.ta_info["namespace_prefixes"]
-        ):  # Register any namespace prefixes specified in syntax
-            for eachns in self.ta_info["namespace_prefixes"]:
-                ET.register_namespace(eachns[0], eachns[1])
-        # xml prolog: always use.*********************************
-        # standalone, DOCTYPE, processing instructions: only possible in python >= 2.7 or if encoding is utf-8/ascii
-        if (
-            not python26
-            or self.ta_info["charset"] in ["us-ascii", "utf-8"]
-            or ET.VERSION >= "1.3.0"
+        """core writing in XML: handle encoding, xml-declaration, indenting
+        used by write and writeenvelope
+        """
+        ETI.include(root)
+        # xml-declaration: not needed for encoding utf-8
+        if "encoding" in self.ta_info and self.ta_info["encoding"] not in (
+            "utf-8",
+            "UTF-8",
+            "utf8",
+            "UTF8",
         ):
-            if self.ta_info["indented"]:
-                indentstring = b"\n"
+            encodingpython = self.ta_info["encoding"]
+            encodingxml = encodingpython.replace("_", "-").upper()
+            if encodingpython == "iso-8859-1":
+                encodingxml = "ISO-8859-1"
+            declaration = '<?xml version="1.0" encoding="%s" standalone="no"?>\n' % (encodingxml)
+            if PY3:
+                # Convert XML declaration to bytes before writing
+                declaration = declaration.encode(encodingpython, self.ta_info.get("checkcharsetout", "strict"))
+                self._outstream.write(declaration)
             else:
-                indentstring = b""
-            if self.ta_info["standalone"]:
-                standalonestring = 'standalone="%s" ' % (self.ta_info["standalone"])
-            else:
-                standalonestring = ""
-            processing_instruction = ET.ProcessingInstruction(
-                "xml",
-                'version="%s" encoding="%s" %s'
-                % (self.ta_info["version"], self.ta_info["charset"], standalonestring),
-            )
-            # do not use encoding here. gives double xml prolog; possibly because
-            # ET.ElementTree.write i used again by write()
-            self._outstream.write(ET.tostring(processing_instruction) + indentstring)
-            # doctype /DTD **************************************
-            if self.ta_info["DOCTYPE"]:
-                # ~ self._outstream.write(b'<!DOCTYPE %s>'%(self.ta_info['DOCTYPE']) + indentstring)
-                self._outstream.write(
-                    b"<!DOCTYPE " + self.ta_info["DOCTYPE"].encode("ascii") + b">" + indentstring
-                )
-            # processing instructions (other than prolog) ************
-            if self.ta_info["processing_instructions"]:
-                for eachpi in self.ta_info["processing_instructions"]:
-                    processing_instruction = ET.ProcessingInstruction(eachpi[0], eachpi[1])
-                    # do not use encoding here. gives double xml prolog; possibly because
-                    # ET.ElementTree.write i used again by write()
-                    self._outstream.write(ET.tostring(processing_instruction) + indentstring)
-        # indent the xml elements
+                self._outstream.write(declaration)
+                
+        # Handle ElementTree's tostring output in Python 3
         if self.ta_info["indented"]:
+            botsglobal.logger.debug("Indent is on")
             botslib.indent_xml(root)
-        # write tree to file; this is different for different python/elementtree versions
-        if python26 and ET.VERSION < "1.3.0":
-            xmltree.write(self._outstream, encoding=self.ta_info["charset"])
+            
+        if PY3:
+            # In Python 3, ET.tostring returns bytes when encoding is specified
+            xml_bytes = ET.tostring(
+                root,
+                encoding=self.ta_info.get("encoding", "utf-8"),
+                method="xml"
+            )
+            self._outstream.write(xml_bytes)
         else:
-            xmltree.write(self._outstream, encoding=self.ta_info["charset"], xml_declaration=False)
+            # Python 2 code path - writes directly
+            ET.ElementTree(root).write(
+                self._outstream,
+                encoding=self.ta_info.get("encoding", "utf-8"),
+                method="xml"
+            )
 
     def _node2xml(self, node_instance):
         """recursive method."""
@@ -961,7 +978,8 @@ class xml(Outmessage):
         return xmlrecord
 
     def _initwrite(self):
-        botsglobal.logger.debug('Start writing to file "%(filename)s".', self.ta_info)
+        if hasattr(botsglobal, 'logger') and botsglobal.logger:
+            botsglobal.logger.debug('Start writing to file "%(filename)s".', self.ta_info)
         self._outstream = botslib.opendata_bin(self.ta_info["filename"], "wb")
 
 
@@ -1003,31 +1021,64 @@ class json(Outmessage):
     def _initwrite(self):
         super(json, self)._initwrite()
         if self.multiplewrite:
-            self._outstream.write("[")
+            # Ensure "[" is properly encoded for Python 3
+            if PY3:
+                self._outstream.write(b"[")
+            else:
+                self._outstream.write("[")
 
     def _write(self, node_instance):
         """convert node tree to appropriate python object.
         python objects are written to json by simplejson.
         """
         if self.nrmessagewritten:
-            self._outstream.write(",")
+            # Ensure "," is properly encoded for Python 3
+            if PY3:
+                self._outstream.write(b",")
+            else:
+                self._outstream.write(",")
+                
         jsonobject = {node_instance.record["BOTSID"]: self._node2json(node_instance)}
         if self.ta_info["indented"]:
             indent = 2
         else:
             indent = None
-        simplejson.dump(
-            jsonobject,
-            self._outstream,
-            skipkeys=False,
-            ensure_ascii=False,
-            check_circular=False,
-            indent=indent,
-        )
+            
+        # Python 3 compatibility: simplejson.dump produces str in Python 3, 
+        # which needs to be encoded to bytes before writing to binary file
+        if PY3:
+            # Convert the JSON to a string first
+            json_str = simplejson.dumps(
+                jsonobject,
+                skipkeys=False,
+                ensure_ascii=False,
+                check_circular=False,
+                indent=indent,
+            )
+            # Then encode to bytes using the specified charset
+            json_bytes = json_str.encode(
+                self.ta_info.get("charset", "utf-8"), 
+                self.ta_info.get("checkcharsetout", "strict")
+            )
+            self._outstream.write(json_bytes)
+        else:
+            # Python 2 code path
+            simplejson.dump(
+                jsonobject,
+                self._outstream,
+                skipkeys=False,
+                ensure_ascii=False,
+                check_circular=False,
+                indent=indent,
+            )
 
     def _closewrite(self):
         if self.multiplewrite:
-            self._outstream.write("]")
+            # Ensure "]" is properly encoded for Python 3
+            if PY3:
+                self._outstream.write(b"]")
+            else:
+                self._outstream.write("]")
         super(json, self)._closewrite()
 
     def _node2json(self, node_instance):
@@ -1148,7 +1199,8 @@ class templatehtml(Outmessage):
     def _write(self, node_instance):
         templatefile = botslib.abspath(self.__class__.__name__, self.ta_info["template"])
         try:
-            botsglobal.logger.debug('Start writing to file "%(filename)s".', self.ta_info)
+            if hasattr(botsglobal, 'logger') and botsglobal.logger:
+                botsglobal.logger.debug('Start writing to file "%(filename)s".', self.ta_info)
             loader = self.template.TemplateLoader(auto_reload=False)
             tmpl = loader.load(templatefile)
         except:
@@ -1182,7 +1234,8 @@ class templatehtml(Outmessage):
             )
         finally:
             filehandler.close()
-            botsglobal.logger.debug(_('End writing to file "%(filename)s".'), self.ta_info)
+            if hasattr(botsglobal, 'logger') and botsglobal.logger:
+                botsglobal.logger.debug(_('End writing to file "%(filename)s".'), self.ta_info)
 
     def writeall(self):
         if not self.root.record:
@@ -1208,9 +1261,11 @@ class db(Outmessage):
             raise botslib.OutMessageError(
                 _("No outgoing message")
             )  # then there is nothing to write...
-        botsglobal.logger.debug('Start writing to file "%(filename)s".', self.ta_info)
+        if hasattr(botsglobal, 'logger') and botsglobal.logger:
+            botsglobal.logger.debug('Start writing to file "%(filename)s".', self.ta_info)
         botslib.writedata_pickled(self.ta_info["filename"], self.root)
-        botsglobal.logger.debug('End writing to file "%(filename)s".', self.ta_info)
+        if hasattr(botsglobal, 'logger') and botsglobal.logger:
+            botsglobal.logger.debug('End writing to file "%(filename)s".', self.ta_info)
         self.ta_info["envelope"] = "db"
         self.ta_info["merge"] = False
 
@@ -1229,10 +1284,45 @@ class raw(Outmessage):
             raise botslib.OutMessageError(
                 _("No outgoing message")
             )  # then there is nothing to write...
-        botsglobal.logger.debug('Start writing to file "%(filename)s".', self.ta_info)
-        self._outstream = botslib.opendata_bin(self.ta_info["filename"], "wb")
-        self._outstream.write(self.root)
-        self._outstream.close()
-        botsglobal.logger.debug('End writing to file "%(filename)s".', self.ta_info)
+            
+        if hasattr(botsglobal, 'logger') and botsglobal.logger:
+            botsglobal.logger.debug('Start writing to file "%(filename)s".', self.ta_info)
+            
+        try:
+            self._outstream = botslib.opendata_bin(self.ta_info["filename"], "wb")
+            
+            # Ensure content is bytes for Python 3
+            try:
+                if PY3 and isinstance(self.root, str):
+                    charset = self.ta_info.get("charset", "utf-8")
+                    errors = self.ta_info.get("checkcharsetout", "strict")
+                    if hasattr(botsglobal, 'logger') and botsglobal.logger:
+                        botsglobal.logger.debug(f'Converting string to bytes using charset "{charset}"')
+                    self.root = self.root.encode(charset, errors)
+            except UnicodeError as e:
+                if hasattr(botsglobal, 'logger') and botsglobal.logger:
+                    botsglobal.logger.error(f'Unicode error in encoding: {str(e)}')
+                content = botslib.get_relevant_text_for_UnicodeError(e)
+                raise botslib.OutMessageError(
+                    _('[F53]: Raw content encoding error for character-set "%(char)s": %(content)s'),
+                    {"char": self.ta_info.get("charset", "utf-8"), "content": content},
+                )
+                    
+            self._outstream.write(self.root)
+            
+        except Exception as e:
+            if hasattr(botsglobal, 'logger') and botsglobal.logger:
+                botsglobal.logger.error(f'Error writing raw file: {str(e)}')
+            raise botslib.OutMessageError(
+                _('[F54]: Error writing raw file: %(error)s'),
+                {"error": str(e)},
+            )
+        finally:
+            if hasattr(self, '_outstream') and self._outstream:
+                self._outstream.close()
+                
+        if hasattr(botsglobal, 'logger') and botsglobal.logger:
+            botsglobal.logger.debug('End writing to file "%(filename)s".', self.ta_info)
+            
         self.ta_info["envelope"] = "raw"
         self.ta_info["merge"] = False
