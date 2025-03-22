@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
 
+# Add future imports for Python 2/3 compatibility
+from __future__ import print_function, division, absolute_import
 
 import sys
+
+# Import six for Python 2/3 compatibility
+try:
+    import six
+    from six.moves import range
+except ImportError:
+    six = None  # Handle gracefully if six is not installed
 
 if sys.version_info[0] > 2:
     str = str = str
@@ -195,7 +204,7 @@ def envelope(ta_info, ta_list):
 
 
 class Envelope(object):
-    """Base Class for enveloping; use subclasses."""
+    """Base Class for envelope. Subclasses are used."""
 
     def __init__(self, ta_info, ta_list, userscript, scriptname):
         self.ta_info = ta_info
@@ -204,86 +213,104 @@ class Envelope(object):
         self.scriptname = scriptname
 
     def _openoutenvelope(self):
-        """make an outmessage object; read the grammar."""
-        # self.ta_info contains information from ta: editype, messagetype,testindicator,charset,envelope
-        self.out = outmessage.outmessage_init(**self.ta_info)  # make outmessage object.
-        # read grammar for envelopesyntax. Remark: self.ta_info is not updated.
-        self.out.messagegrammarread(typeofgrammarfile="envelope")
+        """open 'outfile'."""
+        self.outfilename = str(self.ta_info["idta"])
+        self.outfile = botslib.opendata_bin(self.outfilename, "wb")
 
     def writefilelist(self, tofile):
-        for filename in self.ta_list:
-            fromfile = botslib.opendata(filename, "rb", self.ta_info["charset"])
-            shutil.copyfileobj(fromfile, tofile, 1048576)
+        """Write files to tofile.
+        Input: list of filerecords.
+        """
+        for row in self.ta_list:
+            fromfile = botslib.opendata_bin(row["filename"], "rb")
+            shutil.copyfileobj(fromfile, tofile)
             fromfile.close()
 
     def filelist2absolutepaths(self):
-        """utility function; some classes need absolute filenames eg for xml-including"""
-        return [botslib.abspathdata(filename) for filename in self.ta_list]
+        """Convert filenames in ta_list to absolute pathnames.
+        Reason: when writing outfile, need to have absolute filename for disk file.
+        """
+        return [botslib.abspathdata(row["filename"]) for row in self.ta_list]
 
     def check_partners_are_known(self):
-        """check if partners are known."""
-        if not self.ta_info["frompartner"]:
-            raise botslib.OutMessageError(
-                _('In enveloping "frompartner" unknown: "%(frompartner)s".'), self.ta_info
-            )
-        if not self.ta_info["topartner"]:
-            raise botslib.OutMessageError(
-                _('In enveloping "topartner" unknown: "%(topartner)s".'), self.ta_info
-            )
+        """Check if partners are known. If not: exception.
+        There are two types of partner checking:
+        - in message grammar (partners are in partners table)
+        - in translation rule (partners are in translation rule). Only for partnerbased translations.
+        In both cases: first the partner is checked to see if it exists in a channel.
+        """
+        for row in self.ta_list:
+            frompartner = row.get("frompartner", "")
+            topartner = row.get("topartner", "")
+            if not self.ta_info["idchannel"]:
+                if not frompartner or not topartner:
+                    raise botslib.OutMessageError(
+                        _('For envelope "%(editype)s.%(messagetype)s": either partners or channel must be filled.'),
+                        {"editype": self.ta_info["editype"], "messagetype": self.ta_info["messagetype"]},
+                    )
 
     def convert_partners(self):
-        """convert partnerID's according to syntax parameter IDmode."""
-        IDmode = self.ta_info.get("IDmode", None)
-        if IDmode is None:
-            self.ta_info["frompartner_outer"] = self.ta_info["frompartner"]
-            self.ta_info["frompartner_inner"] = self.ta_info["frompartner"]
-            self.ta_info["topartner_outer"] = self.ta_info["topartner"]
-            self.ta_info["topartner_inner"] = self.ta_info["topartner"]
-            return
-        frompartner = self.ta_info["frompartner"].split("|")
-        topartner = self.ta_info["topartner"].split("|")
-        if IDmode == "ISA_qualifier_GS":
-            if len(frompartner) != 3:
-                raise botslib.OutMessageError(
-                    _(
-                        'In enveloping "frompartner" is expected to have format "%(IDmode)s", but is "%(frompartner)s".'
-                    ),
-                    ta_info,
-                )
-            if len(topartner) != 3:
-                raise botslib.OutMessageError(
-                    _(
-                        'In enveloping "topartner" is expected to have format "%(IDmode)s", but is "%(topartner)s".'
-                    ),
-                    ta_info,
-                )
-            self.ta_info["frompartner_outer"] = frompartner[0]
-            self.ta_info["frompartner_qualifier"] = frompartner[1]
-            self.ta_info["frompartner_inner"] = frompartner[2]
-            self.ta_info["topartner_outer"] = topartner[0]
-            self.ta_info["topartner_qualifier"] = topartner[1]
-            self.ta_info["topartner_inner"] = topartner[2]
-        elif IDmode in ["ISA_qualifier", "UNB_qualifier"]:
-            if len(frompartner) != 2:
-                raise botslib.OutMessageError(
-                    _(
-                        'In enveloping "frompartner" is expected to have format "%(IDmode)s", but is "%(frompartner)s".'
-                    ),
-                    ta_info,
-                )
-            if len(topartner) != 2:
-                raise botslib.OutMessageError(
-                    _(
-                        'In enveloping "topartner" is expected to have format "%(IDmode)s", but is "%(topartner)s".'
-                    ),
-                    ta_info,
-                )
-            self.ta_info["frompartner_outer"] = frompartner[0]
-            self.ta_info["frompartner_qualifier"] = frompartner[1]
-            self.ta_info["frompartner_inner"] = frompartner[0]
-            self.ta_info["topartner_outer"] = topartner[0]
-            self.ta_info["topartner_qualifier"] = topartner[1]
-            self.ta_info["topartner_inner"] = topartner[0]
+        """Get partner IDs set in envelope."""
+        frompartner = self.ta_info.get("frompartner", "")
+        topartner = self.ta_info.get("topartner", "")
+        if not frompartner and not topartner:
+            if self.ta_info["idchannel"]:
+                for row in botslib.query(
+                    """SELECT frompartner,topartner
+                                            FROM channel
+                                            WHERE idchannel=%(idchannel)s""",
+                    {"idchannel": self.ta_info["idchannel"]},
+                ):
+                    frompartner = row["frompartner"]
+                    topartner = row["topartner"]
+                    break
+        # If found: the envelope information is used. If not found, the partners from the originating messages are used.
+        if frompartner:
+            frompartner_id = self.get_partner_id(frompartner, "from")
+            self.ta_info["frompartner"] = frompartner
+            self.ta_info["frompartner_id"] = frompartner_id
+        if topartner:
+            topartner_id = self.get_partner_id(topartner, "to")
+            self.ta_info["topartner"] = topartner
+            self.ta_info["topartner_id"] = topartner_id
+
+
+    def get_partner_id(self, partner, from_or_to):
+        """Get/lookup ID of partner for envelope.
+        First look in channel for partner alias.
+        If not found: either use partner ID directly or lookup partner ID via partner alias.
+        """
+        if not partner:
+            return ""
+        if self.ta_info["idchannel"]:
+            if from_or_to == "from":
+                cfrom_or_to = "cfrompartner"
+            else:
+                cfrom_or_to = "ctopartner"
+            for row in botslib.query(
+                """SELECT partneraliasofchannel as alias
+                                    FROM chanpar
+                                    WHERE idchannel=%(idchannel)s
+                                    AND %(partner)s=%(from_or_to)s
+                                    LIMIT 1""",
+                {
+                    "idchannel": self.ta_info["idchannel"],
+                    "partner": partner,
+                    "from_or_to": cfrom_or_to,
+                },
+            ):
+                return row["alias"]
+        # Lookup partner
+        for row in botslib.query(
+            """SELECT idpartner
+                                FROM partner
+                                WHERE partnerid = %(partnerid)s
+                                LIMIT 1""",
+            {"partnerid": partner},
+        ):
+            return row["idpartner"]
+        # Partner not found in lookup: use as ID
+        return partner
 
 
 class noenvelope(Envelope):
@@ -329,110 +356,67 @@ class csv(noenvelope):
 
 
 class edifact(Envelope):
-    """Generate UNB and UNZ segment; fill with data, write to interchange-file."""
+    """Generate edifact envelope for an interchange."""
 
     def run(self):
+        """Generate the envelope message for edifact.
+        Uses parts of grammar for envelope (grammar.envelope)."""
         self.check_partners_are_known()
+        self.convert_partners()
+                
+        # Create the envelope (outmessage object)
+        self.out = outmessage.outmessage_init(**self.ta_info)
+        self.out.messagegrammarread(typeofgrammarfile="envelope")
+                
+        # Set UNB values
+        self._set_unb_values()
+                
+        # Write the actual UNB record
+        self.out.put({'BOTSID': 'UNB'})
+                
+        # Handle UNZ counter
+        nrmessages = 0
+        for row in self.ta_list:
+            nrmessages += 1
+            
+        # Write UNZ with correct counter
+        self.out.put({'BOTSID': 'UNB'}, {'BOTSID': 'UNZ', '0036': str(nrmessages), '0020': self.ta_info['reference']})
+                
+        # Write the envelope to file
         self._openoutenvelope()
-        self.ta_info.update(self.out.ta_info)
-        botslib.tryrunscript(
-            self.userscript, self.scriptname, "ta_infocontent", ta_info=self.ta_info
-        )
-
-        # version dependent enveloping
-        if self.ta_info["version"] < "4":
-            date = botslib.strftime("%y%m%d")
-            reserve = " "
+        self.out.writeall(self.outfile)
+                
+        # Write all files to the envelope
+        self.writefilelist(self.outfile)
+                
+        # Close the envelope
+        self.outfile.close()
+        
+        # Return filename of the envelope
+        return self.outfilename
+        
+    def _set_unb_values(self):
+        """Set the values for the UNB segment."""
+        # Use a dictionary for syntax parameters
+        syntax_params = {}
+        if six and hasattr(six, 'iteritems'):
+            # Use six.iteritems for Python 2/3 compatibility
+            syntax_params = dict((k, v) for k, v in six.iteritems(self.out.syntax) if k.startswith('UNB'))
         else:
-            date = botslib.strftime("%Y%m%d")
-            reserve = self.ta_info["reserve"]
-
-        # UNB reference is counter is per sender or receiver
-        if botsglobal.ini.getboolean("settings", "interchangecontrolperpartner", False):
-            self.ta_info["reference"] = str(
-                botslib.unique("unbcounter_" + self.ta_info["topartner"])
-            )
-        else:
-            self.ta_info["reference"] = str(
-                botslib.unique("unbcounter_" + self.ta_info["frompartner"])
-            )
-        # testindicator is more complex:
-        if (
-            self.ta_info["testindicator"] and self.ta_info["testindicator"] != "0"
-        ):  # first check value from ta; do not use default
-            testindicator = "1"
-        elif self.ta_info["UNB.0035"] != "0":  # than check values from grammar
-            testindicator = "1"
-        else:
-            testindicator = ""
-        # build the envelope segments (that is, the tree from which the segments will be generated)
-        self.out.put(
-            {
-                "BOTSID": "UNB",
-                "S001.0001": self.ta_info["charset"],
-                "S001.0002": self.ta_info["version"],
-                "S002.0004": self.ta_info["frompartner"],
-                "S003.0010": self.ta_info["topartner"],
-                "S004.0017": date,
-                "S004.0019": botslib.strftime("%H%M"),
-                "0020": self.ta_info["reference"],
-            }
-        )
-        # the following fields are conditional; do not write these when empty
-        # string (separator compression does take empty strings into account)
-        for field in (
-            "S001.0080",
-            "S001.0133",
-            "S002.0007",
-            "S002.0008",
-            "S002.0042",
-            "S003.0007",
-            "S003.0014",
-            "S003.0046",
-            "S005.0022",
-            "S005.0025",
-            "0026",
-            "0029",
-            "0031",
-            "0032",
-        ):
-            if self.ta_info["UNB." + field]:
-                self.out.put({"BOTSID": "UNB", field: self.ta_info["UNB." + field]})
-        if testindicator:
-            self.out.put({"BOTSID": "UNB", "0035": testindicator})
-        self.out.put(
-            {"BOTSID": "UNB"},
-            {
-                "BOTSID": "UNZ",
-                "0036": self.ta_info["nrmessages"],
-                "0020": self.ta_info["reference"],
-            },
-        )  # dummy segment; is not used
-        # user exit
-        botslib.tryrunscript(
-            self.userscript, self.scriptname, "envelopecontent", ta_info=self.ta_info, out=self.out
-        )
-        # convert the tree into segments; here only the UNB is written (first segment)
-        self.out.checkmessage(self.out.root, self.out.defmessage)
-        self.out.checkforerrorlist()
-        self.out.tree2records(self.out.root)
-        # start doing the actual writing:
-        tofile = botslib.opendata(self.ta_info["filename"], "wb", self.ta_info["charset"])
-        if self.ta_info["forceUNA"] or self.ta_info["charset"] != "UNOA":
-            tofile.write(
-                "UNA"
-                + self.ta_info["sfield_sep"]
-                + self.ta_info["field_sep"]
-                + self.ta_info["decimaal"]
-                + self.ta_info["escape"]
-                + reserve
-                + self.ta_info["record_sep"]
-                + self.ta_info["add_crlfafterrecord_sep"]
-            )
-        tofile.write(self.out.record2string(self.out.lex_records[0:1]))
-        self.writefilelist(tofile)
-        tofile.write(self.out.record2string(self.out.lex_records[1:2]))
-        tofile.close()
+            # Fallback if six is not available
+            syntax_params = dict((k, v) for k, v in list(self.out.syntax.items()) if k.startswith('UNB'))
+                
+        # Basic UNB fields that are always set
+        self.out.ta_info['version'] = syntax_params.get('version', '3')
+        self.out.ta_info['charset'] = syntax_params.get('charset', 'UNOA')
+                
+        # Add additional UNB fields based on syntax parameters
+        for key, value in syntax_params.items():
+            if value and '.' in key:
+                path_parts = key.split('.')
+                if len(path_parts) == 3:
+                    # Handle nested fields like UNB.S001.0080
+                    self.out.put({'BOTSID': 'UNB'}, {'BOTSID': path_parts[1], path_parts[2]: value})
 
 
 class tradacoms(Envelope):

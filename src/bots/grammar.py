@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
 
+# Add future imports for Python 2/3 compatibility
+from __future__ import print_function, division, absolute_import
 
 import sys
+
+# Import six for Python 2/3 compatibility
+try:
+    import six
+    from six.moves import range
+except ImportError:
+    six = None  # Handle gracefully if six is not installed
 
 if sys.version_info[0] > 2:
     str = str = str
@@ -220,7 +229,7 @@ class Grammar(object):
                 )
             return  # already did checks - result OK! skip checks
         # not checked (in this run): so check the recorddefs
-        for recordid, fields in list(self.recorddefs.items()):
+        for recordid, fields in (six.iteritems(self.recorddefs) if six and hasattr(six, 'iteritems') else list(self.recorddefs.items())):
             if not isinstance(recordid, str):
                 raise botslib.GrammarError(
                     _(

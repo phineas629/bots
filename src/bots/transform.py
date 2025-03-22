@@ -1,19 +1,24 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function, division, absolute_import
 
 import sys
-
-if sys.version_info[0] > 2:
-    str = str = str
 import collections
 import copy
 import os
 import unicodedata
 
+# Import the six compatibility library
 try:
-    import pickle as pickle
+    import six
+    from six.moves import cPickle as pickle
 except ImportError:
-    import pickle
+    # Handle gracefully if six is not installed
+    six = None
+    try:
+        import pickle as pickle
+    except ImportError:
+        import pickle
 
 from django.utils.translation import gettext as _
 
@@ -37,7 +42,6 @@ from .botslib import (
 )
 from .communication import run
 from .envelope import mergemessages
-
 
 @botslib.log_session
 def translate(startstatus, endstatus, routedict, rootidta):
@@ -438,20 +442,28 @@ def persist_lookup(domein, botskey):
 # ***code conversion via database tabel ccode
 
 
-def ccode(ccodeid, leftcode, field=str("rightcode"), safe=False):
-    """converts code using a db-table.
-    converted value is returned, exception if not there.
+def ccode(ccodeid, leftcode, field=None, safe=False):
+    """look up code in code conversion table
+    search in right field of ccode with ids ccodeid, field leftcode, lookup field field
+    return the result
+    - if field not found use safe: if safe has boolean value, return value of safe. 
+    - if no safe specified (safe=None): return None. If safe=False (default): give error.
     """
+    if field is None:
+        field = "rightcode"
+    # Convert field to consistent string type for both Python 2 and 3
+    field_str = six.text_type(field) if six else str(field)
+    
     for row in botslib.query(
         """SELECT """
-        + field
+        + field_str
         + """
                                 FROM ccode
                                 WHERE ccodeid_id = %(ccodeid)s
                                 AND leftcode = %(leftcode)s""",
         {"ccodeid": ccodeid, "leftcode": leftcode},
     ):
-        return row[field]
+        return row[field_str]
     if safe is None:
         return None
     elif safe:
@@ -463,22 +475,30 @@ def ccode(ccodeid, leftcode, field=str("rightcode"), safe=False):
         )
 
 
-def safe_ccode(ccodeid, leftcode, field=str("rightcode")):  # depreciated, use ccode with safe=True
+def safe_ccode(ccodeid, leftcode, field=None):  # depreciated, use ccode with safe=True
+    """Safe version of ccode that returns the original value if no match is found."""
+    if field is None:
+        field = "rightcode"
     return ccode(ccodeid, leftcode, field, safe=True)
 
 
-def reverse_ccode(ccodeid, rightcode, field=str("leftcode"), safe=False):
-    """as ccode but reversed lookup."""
+def reverse_ccode(ccodeid, rightcode, field=None, safe=False):
+    """As ccode but reversed lookup: search with rightcode, return leftcode."""
+    if field is None:
+        field = "leftcode"
+    # Convert field to consistent string type for both Python 2 and 3
+    field_str = six.text_type(field) if six else str(field)
+    
     for row in botslib.query(
         """SELECT """
-        + field
+        + field_str
         + """
                                 FROM ccode
                                 WHERE ccodeid_id = %(ccodeid)s
                                 AND rightcode = %(rightcode)s""",
         {"ccodeid": ccodeid, "rightcode": rightcode},
     ):
-        return row[field]
+        return row[field_str]
     if safe is None:
         return None
     elif safe:
@@ -490,10 +510,10 @@ def reverse_ccode(ccodeid, rightcode, field=str("leftcode"), safe=False):
         )
 
 
-def safe_reverse_ccode(
-    ccodeid, rightcode, field=str("leftcode")
-):  # depreciated, use reverse_ccode with safe=True
-    """as safe_ccode but reversed lookup."""
+def safe_reverse_ccode(ccodeid, rightcode, field=None):  # depreciated, use reverse_ccode with safe=True
+    """As safe_ccode but reversed lookup."""
+    if field is None:
+        field = "leftcode"
     return reverse_ccode(ccodeid, rightcode, field, safe=True)
 
 
@@ -504,12 +524,17 @@ rcodetconversion = reverse_ccode
 safercodetconversion = safe_reverse_ccode
 
 
-def getcodeset(ccodeid, leftcode, field=str("rightcode")):
+def getcodeset(ccodeid, leftcode, field=None):
     """Returns a list of all 'field' values in ccode with right ccodeid and leftcode."""
+    if field is None:
+        field = "rightcode"
+    # Convert field to consistent string type for both Python 2 and 3
+    field_str = six.text_type(field) if six else str(field)
+    
     terug = []
     for row in botslib.query(
         """SELECT """
-        + field
+        + field_str
         + """
                                 FROM ccode
                                 WHERE ccodeid_id = %(ccodeid)s
@@ -517,7 +542,7 @@ def getcodeset(ccodeid, leftcode, field=str("rightcode")):
                                 ORDER BY id""",
         {"ccodeid": ccodeid, "leftcode": leftcode},
     ):
-        terug.append(row[field])
+        terug.append(row[field_str])
     return terug
 
 

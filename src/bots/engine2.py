@@ -579,8 +579,21 @@ def dict2xml(d):
     return ET.tostring(node)
 
 
+from __future__ import print_function, division, absolute_import
+
+# Import the six compatibility library if available
+try:
+    import six
+except ImportError:
+    six = None  # Handle gracefully if six is not installed
+
+
 def filterlist(lijst, names):
-    return [dict((k, v) for k, v in list(d.items()) if k in names) for d in lijst]
+    """Filter a list of dictionaries, keeping only the keys specified in names."""
+    if six and hasattr(six, 'iteritems'):
+        return [dict((k, v) for k, v in six.iteritems(d) if k in names) for d in lijst]
+    else:
+        return [dict((k, v) for k, v in list(d.items()) if k in names) for d in lijst]
 
 
 def report(run):

@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function, division, absolute_import
 
 import sys
 
-if sys.version_info[0] > 2:
-    str = str = str
+# Import six for Python 2/3 compatibility
+try:
+    import six
+except ImportError:
+    # Handle case where six is not installed
+    pass
+
 from django.utils.translation import gettext as _
 
 # bots-modules
@@ -344,12 +350,23 @@ class new(object):
         return self.minta4query
 
     def get_minta4query_route(self):
-        """get the first idta for queries etc in route."""
-        return self.minta4query_route
+        """find out where route was started.
+        if not started in crashed run, value for recovery run will be found.
+        """
+        for row in botslib.query(
+            """SELECT MIN(idta) as route_idta
+                                    FROM ta
+                                    WHERE idta > %(rootidta_of_current_run)s
+                                    AND script = %(rootidta_of_current_run)s
+                                    AND idroute = %(idroute)s """,
+            {"rootidta_of_current_run": self.get_minta4query(), "idroute": botslib.getrouteid()},
+        ):
+            # Use six.moves.builtins.str for consistent string handling
+            return row[six.moves.builtins.str("route_idta") if six else "route_idta"]
 
     def get_minta4query_routepart(self):
-        """get the first idta for queries etc in route-part."""
-        return self.minta4query_routepart
+        """as seq is not logged, use start-point for whole route."""
+        return self.get_minta4query_route()
 
 
 class crashrecovery(new):
@@ -430,7 +447,8 @@ class crashrecovery(new):
                                     AND idroute = %(idroute)s """,
             {"rootidta_of_current_run": self.get_minta4query(), "idroute": botslib.getrouteid()},
         ):
-            return row[str("route_idta")]
+            # Use six.moves.builtins.str for consistent string handling
+            return row[six.moves.builtins.str("route_idta") if six else "route_idta"]
 
     def get_minta4query_routepart(self):
         """as seq is not logged, use start-point for whole route."""
@@ -456,7 +474,8 @@ class automaticretrycommunication(new):
                                     AND statust = %(statust)s """,
             {"statust": ERROR, "idta_lastretry": idta_lastretry},
         ):
-            startidta = row[str("min_idta")]
+            # Use six.moves.builtins.str for consistent string handling
+            startidta = row[six.moves.builtins.str("min_idta") if six else "min_idta"]
         if not startidta:
             return False  # no run
         do_retransmit = False
@@ -469,14 +488,16 @@ class automaticretrycommunication(new):
             {"statust": ERROR, "status": EXTERNOUT, "startidta": startidta},
         ):
             do_retransmit = True
-            ta_outgoing = botslib.OldTransaction(row[str("idta")])
+            # Use six.moves.builtins.str for consistent string handling
+            str_key = six.moves.builtins.str if six else str
+            ta_outgoing = botslib.OldTransaction(row[str_key("idta")])
             ta_outgoing.update(retransmit=False, statust=RESEND)  # set retransmit back to False
             # parent ta with status RAWOUT; this is where the outgoing file is kept
-            ta_resend = botslib.OldTransaction(row[str("parent")])
+            ta_resend = botslib.OldTransaction(row[str_key("parent")])
             # inject; status is DONE so this ta is not used further
             ta_externin = ta_resend.copyta(status=EXTERNIN, statust=DONE)
             ta_externin.copyta(
-                status=FILEOUT, statust=OK, numberofresends=row[str("numberofresends")]
+                status=FILEOUT, statust=OK, numberofresends=row[str_key("numberofresends")]
             )  # reinjected file is ready as new input
 
         if do_retransmit:

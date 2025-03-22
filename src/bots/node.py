@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function, division, absolute_import
+
+# Import the six compatibility library
+try:
+    import six
+except ImportError:
+    six = None  # Handle gracefully if six is not installed
 
 import collections
 import copy
 import sys
 
-if sys.version_info[0] > 2:
-    str = str
 try:
     import cdecimal as decimal
 except ImportError:
@@ -137,7 +142,7 @@ class Node(object):
 
     def _getcore(self, mpaths):
         if len(mpaths) != 1:
-            for key, value in list(mpaths[0].items()):
+            for key, value in six.iteritems(mpaths[0]) if six and hasattr(six, 'iteritems') else list(mpaths[0].items()):
                 if key not in self.record or value != self.record[key]:
                     return None
             else:
@@ -149,7 +154,7 @@ class Node(object):
                     return None
         else:
             terug = 1
-            for key, value in list(mpaths[0].items()):
+            for key, value in six.iteritems(mpaths[0]) if six and hasattr(six, 'iteritems') else list(mpaths[0].items()):
                 if key not in self.record:
                     return None
                 elif value is None:

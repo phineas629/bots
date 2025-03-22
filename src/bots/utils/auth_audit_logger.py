@@ -47,8 +47,13 @@ def setup_auth_audit_logger():
     logger = logging.getLogger("auth_audit")
     logger.setLevel(logging.INFO)
 
+    # Create logs directory if it doesn't exist
+    log_dir = "/app/logs"
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
     # File handler for audit logs
-    file_handler = logging.FileHandler("/app/logs/auth_audit.log")
+    file_handler = logging.FileHandler(os.path.join(log_dir, "auth_audit.log"))
     file_handler.setFormatter(JsonFormatter())
 
     # Console handler for debugging
@@ -80,7 +85,7 @@ AUTH_EVENTS = {
 def log_auth_event(logger, event_type, user=None, extra_data=None):
     """Log an authentication event with relevant details."""
     if event_type not in AUTH_EVENTS:
-        raise ValueError(f"Unknown event type: {event_type}")
+        raise ValueError("Unknown event type: {}".format(event_type))
 
     # Prepare log data
     data = {
@@ -107,7 +112,7 @@ def log_auth_event(logger, event_type, user=None, extra_data=None):
 
     # Create a log record with the data
     logger_extra = {"data": data}
-    logger.info(f"AUTH EVENT: {event_type}", extra=logger_extra)
+    logger.info("AUTH EVENT: {}".format(event_type), extra=logger_extra)
 
     return data
 
@@ -234,7 +239,7 @@ def audit_auth_action(event_type):
                 return result
             except Exception as e:
                 # Log exception
-                logger.exception(f"Exception in {func.__name__}: {str(e)}")
+                logger.exception("Exception in {}: {}".format(func.__name__, str(e)))
                 raise
 
         return wrapper

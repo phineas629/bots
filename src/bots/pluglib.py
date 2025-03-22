@@ -18,6 +18,14 @@ from django.utils.translation import gettext as _
 
 from . import botsglobal, botslib, models
 
+from __future__ import print_function, division, absolute_import
+
+# Import the six compatibility library if available
+try:
+    import six
+except ImportError:
+    six = None  # Handle gracefully if six is not installed
+
 """ functions for reading and making plugins.
     Reading an making functions are separate functions.
 """
@@ -474,9 +482,11 @@ def plug2string(plugdict):
     str().decode(): bytes->unicode
     str().encode(): unicode->bytes
     """
-    terug = "{" + repr("plugintype") + ": " + repr(plugdict.pop("plugintype"))
-    for key in sorted(plugdict.keys()):
-        terug += ", " + repr(key) + ": " + repr(plugdict[key])
+    # Create a copy of the dict to avoid modifying the original
+    plugdict_copy = plugdict.copy()
+    terug = "{" + repr("plugintype") + ": " + repr(plugdict_copy.pop("plugintype"))
+    for key in sorted(plugdict_copy.keys()):
+        terug += ", " + repr(key) + ": " + repr(plugdict_copy[key])
     terug += "},"
     return terug
 
