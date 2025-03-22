@@ -2,12 +2,37 @@
 
 """Bots configuration for django's admin site."""
 
+from __future__ import print_function, division, absolute_import
+
 from django import forms
 
+# For Django 1.7+ compatibility
 try:
-    from django.forms import util as django_forms_util
-except:
-    from django.forms import utils as django_forms_util  # django1.7
+    from django.forms import utils as django_forms_util
+except ImportError:
+    try:
+        from django.forms import util as django_forms_util  # pre-Django 1.7
+    except ImportError:
+        from django.core import validators as django_forms_util  # fallback
+
+# For Python 2/3 compatibility
+try:
+    import six
+except ImportError:
+    # Minimal fallback if six isn't available
+    import sys
+    
+    class _Six(object):
+        PY2 = sys.version_info[0] == 2
+        PY3 = sys.version_info[0] == 3
+        
+        def iteritems(self, d):
+            if self.PY2:
+                return d.iteritems()
+            else:
+                return d.items()
+    
+    six = _Six()
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
@@ -399,7 +424,18 @@ class PartnerAdmin(BotsAdmin):
     )
 
     def queryset(self, request):
-        return self.model.objects.filter(isgroup=False)
+        """Filter to only show partners (not partner groups)."""
+        return super(PartnerAdmin, self).queryset(request).filter(isgroup=False)
+    
+    # Django 1.8+ compatibility
+    def get_queryset(self, request):
+        """Filter to only show partners (not partner groups)."""
+        # Call the appropriate parent method (queryset for older Django, get_queryset for newer Django)
+        try:
+            qs = super(PartnerAdmin, self).get_queryset(request)
+        except AttributeError:
+            qs = super(PartnerAdmin, self).queryset(request)
+        return qs.filter(isgroup=False)
 
 
 admin.site.register(models.partner, PartnerAdmin)
@@ -431,7 +467,18 @@ class PartnerGroepAdmin(BotsAdmin):
     )
 
     def queryset(self, request):
-        return self.model.objects.filter(isgroup=True)
+        """Filter to only show partner groups (not partners)."""
+        return super(PartnerGroepAdmin, self).queryset(request).filter(isgroup=True)
+
+    # Django 1.8+ compatibility
+    def get_queryset(self, request):
+        """Filter to only show partner groups (not partners)."""
+        # Call the appropriate parent method (queryset for older Django, get_queryset for newer Django)
+        try:
+            qs = super(PartnerGroepAdmin, self).get_queryset(request)
+        except AttributeError:
+            qs = super(PartnerGroepAdmin, self).queryset(request)
+        return qs.filter(isgroup=True)
 
 
 admin.site.register(models.partnergroep, PartnerGroepAdmin)
